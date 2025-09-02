@@ -199,7 +199,7 @@ const CreateRoadmap = () => {
                       <SelectValue placeholder="Select second major (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {majors.map((m) => (
                         <SelectItem key={m} value={m}>{m}</SelectItem>
                       ))}
@@ -228,7 +228,7 @@ const CreateRoadmap = () => {
                       <SelectValue placeholder="Select second minor (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {minors.map((m) => (
                         <SelectItem key={m} value={m}>{m}</SelectItem>
                       ))}
