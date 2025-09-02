@@ -113,7 +113,7 @@ const FeaturesPage = () => {
         {/* Benefits Section */}
         <div className="bg-card/50 rounded-2xl p-8 mb-16">
           <h2 className="text-3xl font-bold text-center text-foreground mb-8">
-            Why Students Choose CareerPath
+            Why Students Choose Timeline
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (

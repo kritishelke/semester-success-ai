@@ -34,7 +34,7 @@ const HowItWorks = () => {
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-            How CareerPath Works
+            How Timeline Works
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             From confused college student to career-ready graduate in 4 simple steps

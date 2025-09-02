@@ -10,6 +10,7 @@ const Navigation = () => {
     { name: "How It Works", path: "/how-it-works" },
     { name: "Create Roadmap", path: "/create-roadmap" },
     { name: "Features", path: "/features" },
+    { name: "Connect with Experts", path: "/connect-experts" },
   ];
 
   return (
@@ -18,7 +19,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg"></div>
-            <span className="text-xl font-bold text-foreground">CareerPath</span>
+            <span className="text-xl font-bold text-foreground">Timeline</span>
           </div>
           
           <div className="hidden md:flex items-center gap-6">

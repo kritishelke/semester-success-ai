@@ -7,6 +7,7 @@ import Navigation from "@/components/Navigation";
 import Home from "./pages/Home";
 import HowItWorks from "./pages/HowItWorks";
 import CreateRoadmap from "./pages/CreateRoadmap";
+import ConnectExperts from "./pages/ConnectExperts";
 import FeaturesPage from "./pages/FeaturesPage";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/create-roadmap" element={<CreateRoadmap />} />
+          <Route path="/connect-experts" element={<ConnectExperts />} />
           <Route path="/features" element={<FeaturesPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
