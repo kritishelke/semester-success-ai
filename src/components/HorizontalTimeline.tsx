@@ -1,9 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle, Circle, Clock, Users, Briefcase, GraduationCap, AlertCircle, Zap, Star, ExternalLink, Crown, Edit3, Save, FileText } from "lucide-react";
+import { CheckCircle, Circle, Clock, Users, Briefcase, GraduationCap, AlertCircle, Zap, Star, ExternalLink, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
+import TaskNotesView from "./TaskNotesView";
 
 interface HorizontalTimelineProps {
   roadmapData?: {
@@ -16,7 +16,16 @@ interface HorizontalTimelineProps {
   };
 }
 
+interface TaskNote {
+  id: string;
+  taskId: string;
+  content: string;
+  aiSuggestion?: string;
+  createdAt: string;
+}
+
 interface Task {
+  id: string;
   priority: 'critical' | 'high' | 'medium' | 'low';
   type: string;
   title: string;
@@ -24,174 +33,216 @@ interface Task {
   icon: any;
   isPremium?: boolean;
   links?: string[];
+  isCustom?: boolean;
 }
 
 const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
-  const [notes, setNotes] = useState("");
-  const [isEditingNotes, setIsEditingNotes] = useState(false);
-  const [savedNotes, setSavedNotes] = useState("");
-  
-  const handleSaveNotes = () => {
-    setSavedNotes(notes);
-    setIsEditingNotes(false);
-    // In a real app, you'd save to localStorage or a database here
-    localStorage.setItem('roadmap-notes', notes);
-  };
+  const [selectedTask, setSelectedTask] = useState<string | null>(null);
+  const [taskNotes, setTaskNotes] = useState<TaskNote[]>([]);
+  const [newTaskContent, setNewTaskContent] = useState("");
+  const [isAddingTask, setIsAddingTask] = useState<string | null>(null);
+  const [roadmapSemesters, setRoadmapSemesters] = useState<any[]>([]);
 
-  const handleEditNotes = () => {
-    setIsEditingNotes(true);
-    setNotes(savedNotes);
-  };
-
-  // Load notes from localStorage on component mount
+  // Load task notes from localStorage
   useEffect(() => {
-    const storedNotes = localStorage.getItem('roadmap-notes');
+    const storedNotes = localStorage.getItem('task-notes');
     if (storedNotes) {
-      setSavedNotes(storedNotes);
-      setNotes(storedNotes);
+      setTaskNotes(JSON.parse(storedNotes));
     }
   }, []);
 
-  // Enhanced roadmap data with priority system and premium features
-  const sampleRoadmap = [
-    {
-      semester: "Current",
-      year: "Sophomore Fall",
-      status: "current",
-      tasks: [
-        { 
-          priority: "critical", 
-          type: "academic", 
-          title: "Complete Core CS Courses", 
-          description: "Data Structures, Algorithms", 
-          icon: GraduationCap 
+  // Save task notes to localStorage
+  const saveTaskNotes = (notes: TaskNote[]) => {
+    setTaskNotes(notes);
+    localStorage.setItem('task-notes', JSON.stringify(notes));
+  };
+
+  // Generate AI suggestion for a task
+  const generateAISuggestion = (taskTitle: string, major: string, career: string) => {
+    const suggestions = {
+      "Complete Core Physics Courses": "Focus on Mathematical Physics (PHYS 3620) and Quantum Mechanics (PHYS 4720) - these are prerequisites for advanced courses.",
+      "Take PDE Course": "MATH 4220 (Partial Differential Equations) is offered in Spring. Consider taking MATH 4210 (Advanced Calculus) first.",
+      "Data Science Coursework": "CS 4774 (Machine Learning) and STAT 4995 (Applied Statistics) are excellent choices. Also consider CS 4501-2 (Data Science).",
+      "LeetCode Practice": "Start with 2-3 problems daily. Focus on Dynamic Programming and Graph algorithms - common in physics simulation roles.",
+      "Research Experience": "Contact Prof. Johnson in Condensed Matter Physics lab - they often need undergrads for computational modeling projects."
+    };
+    return suggestions[taskTitle] || `Consider connecting this with your ${major} major and ${career} career goals. Research specific requirements and prerequisites.`;
+  };
+
+  // Generate actual roadmap based on user data
+  const generateRoadmap = (data: any) => {
+    if (!data) return [];
+
+    const yearIndex = ["Freshman", "Sophomore", "Junior", "Senior"].indexOf(data.year);
+    const remainingSemesters = [];
+    
+    // University-specific course mappings
+    const universityCourses = {
+      "University of Virginia": {
+        "Physics": {
+          "PDE": "MATH 4220 - Partial Differential Equations",
+          "Data Science": "CS 4774 - Machine Learning, STAT 4995 - Applied Statistics", 
+          "Probability": "STAT 3120 - Probability and Statistics",
+          "Advanced Physics": "PHYS 3620 - Mathematical Physics, PHYS 4720 - Quantum Mechanics"
         },
-        { 
-          priority: "high", 
-          type: "skill", 
-          title: "Learn Python & SQL", 
-          description: "Essential for data science roles", 
-          icon: Clock 
+        "Computer Science": {
+          "Algorithms": "CS 4102 - Algorithms, CS 3102 - Theory of Computation",
+          "Data Science": "CS 4774 - Machine Learning, CS 4501-2 - Data Science",
+          "Systems": "CS 4414 - Operating Systems, CS 4480 - Computer Networks"
         },
-        { 
-          priority: "medium", 
-          type: "networking", 
-          title: "Join Computer Science Club", 
-          description: "Build peer connections", 
-          icon: Users 
-        },
-        { 
-          priority: "low", 
-          type: "experience", 
-          title: "Start Personal Projects", 
-          description: "Build portfolio foundation", 
-          icon: Briefcase 
-        },
-      ]
-    },
-    {
-      semester: "Next",
-      year: "Sophomore Spring", 
-      status: "upcoming",
-      tasks: [
-        { 
-          priority: "critical", 
-          type: "internship", 
-          title: "Apply for Summer Internships", 
-          description: "Target 15-20 applications", 
-          icon: Briefcase,
-          isPremium: true,
-          links: ["TechCorp Internships", "StartupJobs", "University Career Center"]
-        },
-        { 
-          priority: "high", 
-          type: "skill", 
-          title: "Build Portfolio Website", 
-          description: "Showcase your projects", 
-          icon: Clock 
-        },
-        { 
-          priority: "medium", 
-          type: "academic", 
-          title: "Take Statistics Course", 
-          description: "Foundation for data analysis", 
-          icon: GraduationCap 
-        },
-        { 
-          priority: "medium", 
-          type: "networking", 
-          title: "Attend Tech Conferences", 
-          description: "Connect with industry professionals", 
-          icon: Users,
-          isPremium: true,
-          links: ["Bay Area Tech Summit", "AI Conference 2024", "Student Developer Days"]
-        },
-      ]
-    },
-    {
-      semester: "Summer",
-      year: "Between Sophomore & Junior",
-      status: "future", 
-      tasks: [
-        { 
-          priority: "critical", 
-          type: "internship", 
-          title: "Complete Software Internship", 
-          description: "Gain real-world experience", 
-          icon: Briefcase 
-        },
-        { 
-          priority: "high", 
-          type: "skill", 
-          title: "Learn React & JavaScript", 
-          description: "Full-stack development skills", 
-          icon: Clock 
-        },
-        { 
-          priority: "medium", 
-          type: "networking", 
-          title: "Connect with Mentors", 
-          description: "Find industry guidance", 
-          icon: Users 
-        },
-      ]
-    },
-    {
-      semester: "Junior Year",
-      year: "Junior Fall & Spring",
-      status: "future",
-      tasks: [
-        { 
-          priority: "critical", 
-          type: "academic", 
-          title: "Advanced CS Coursework", 
-          description: "Machine Learning, Database Systems", 
-          icon: GraduationCap 
-        },
-        { 
-          priority: "high", 
-          type: "skill", 
-          title: "Contribute to Open Source", 
-          description: "Build GitHub presence", 
-          icon: Clock 
-        },
-        { 
-          priority: "medium", 
-          type: "experience", 
-          title: "Lead Student Projects", 
-          description: "Develop leadership skills", 
-          icon: Star 
-        },
-        { 
-          priority: "low", 
-          type: "networking", 
-          title: "Alumni Network Events", 
-          description: "Connect with graduates", 
-          icon: Users 
-        },
-      ]
+        "Data Science": {
+          "Statistics": "STAT 4995 - Applied Statistics, STAT 5120 - Statistical Methods",
+          "Programming": "CS 2150 - Program and Data Representation, CS 4774 - Machine Learning",
+          "Math": "MATH 4220 - PDE, MATH 3354 - Linear Algebra"
+        }
+      }
+    };
+
+    // Generate timeline based on current year
+    for (let i = yearIndex; i < 4; i++) {
+      const yearNames = ["Freshman", "Sophomore", "Junior", "Senior"];
+      const currentYear = yearNames[i];
+      
+      if (i === yearIndex) {
+        // Current semester
+        remainingSemesters.push({
+          semester: "Current",
+          year: `${currentYear} ${new Date().getMonth() >= 8 ? 'Fall' : 'Spring'}`,
+          status: "current",
+          tasks: generateCurrentTasks(data, currentYear)
+        });
+        
+        // Next semester
+        remainingSemesters.push({
+          semester: "Next",
+          year: `${currentYear} ${new Date().getMonth() >= 8 ? 'Spring' : 'Fall'}`,
+          status: "upcoming", 
+          tasks: generateUpcomingTasks(data, currentYear)
+        });
+      } else {
+        // Future years
+        remainingSemesters.push({
+          semester: `${currentYear} Year`,
+          year: `${currentYear} Fall & Spring`,
+          status: "future",
+          tasks: generateFutureTasks(data, currentYear)
+        });
+      }
     }
-  ];
+
+    return remainingSemesters;
+  };
+
+  const generateCurrentTasks = (data: any, year: string) => {
+    const tasks = [];
+    const major = data.majors[0];
+    const university = data.university;
+    
+    // Academic courses based on major and university
+    if (major === "Physics" && university === "University of Virginia") {
+      tasks.push({
+        id: `task-${Date.now()}-1`,
+        priority: "critical",
+        type: "academic",
+        title: "Complete Core Physics Courses",
+        description: "PHYS 3620 - Mathematical Physics, focus on analytical methods",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-2`, 
+        priority: "high",
+        type: "academic",
+        title: "Take PDE Course",
+        description: "MATH 4220 - Partial Differential Equations (Spring offering)",
+        icon: GraduationCap
+      });
+    } else if (major === "Computer Science") {
+      tasks.push({
+        id: `task-${Date.now()}-3`,
+        priority: "critical",
+        type: "academic", 
+        title: "Complete Algorithms Course",
+        description: "CS 4102 - Algorithms, essential for technical interviews",
+        icon: GraduationCap
+      });
+    }
+
+    // Career-specific tasks
+    if (data.career === "Data Scientist") {
+      tasks.push({
+        id: `task-${Date.now()}-4`,
+        priority: "high",
+        type: "skill",
+        title: "Data Science Coursework",
+        description: university === "University of Virginia" ? "CS 4774 - Machine Learning, STAT 4995 - Applied Statistics" : "Take machine learning and statistics courses",
+        icon: Clock
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-5`,
+        priority: "medium", 
+        type: "skill",
+        title: "LeetCode Practice",
+        description: "Practice 2-3 problems daily, focus on arrays and dynamic programming",
+        icon: Zap
+      });
+    }
+
+    return tasks;
+  };
+
+  const generateUpcomingTasks = (data: any, year: string) => {
+    const tasks = [];
+    
+    tasks.push({
+      id: `task-${Date.now()}-6`,
+      priority: "critical",
+      type: "internship", 
+      title: "Apply for Summer Internships",
+      description: "Target 15-20 applications in your field",
+      icon: Briefcase,
+      isPremium: true
+    });
+
+    if (data.career === "Data Scientist") {
+      tasks.push({
+        id: `task-${Date.now()}-7`,
+        priority: "high",
+        type: "skill",
+        title: "Build Data Science Portfolio",
+        description: "Create 3-4 projects showcasing different skills",
+        icon: Clock
+      });
+    }
+
+    return tasks;
+  };
+
+  const generateFutureTasks = (data: any, year: string) => {
+    const tasks = [];
+    
+    if (year === "Junior") {
+      tasks.push({
+        id: `task-${Date.now()}-8`,
+        priority: "critical",
+        type: "experience",
+        title: "Research Experience", 
+        description: "Join a research lab in your field",
+        icon: Star
+      });
+    }
+
+    return tasks;
+  };
+
+  // Generate roadmap when component mounts or roadmapData changes
+  useEffect(() => {
+    if (roadmapData) {
+      const generatedRoadmap = generateRoadmap(roadmapData);
+      setRoadmapSemesters(generatedRoadmap);
+    }
+  }, [roadmapData]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -220,6 +271,64 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
       default: return <Circle className="w-4 h-4" />;
     }
   };
+
+  // Handle task click to show notes
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task.id);
+  };
+
+  // Add custom task
+  const addCustomTask = (semesterIndex: number, taskContent: string) => {
+    const newTask: Task = {
+      id: `custom-${Date.now()}`,
+      priority: "medium",
+      type: "custom",
+      title: taskContent,
+      description: "Custom task added by user",
+      icon: Star,
+      isCustom: true
+    };
+
+    const updatedSemesters = [...roadmapSemesters];
+    updatedSemesters[semesterIndex].tasks.push(newTask);
+    setRoadmapSemesters(updatedSemesters);
+    
+    // Generate AI suggestion
+    const suggestion = generateAISuggestion(taskContent, roadmapData?.majors[0] || "", roadmapData?.career || "");
+    const newNote: TaskNote = {
+      id: `note-${Date.now()}`,
+      taskId: newTask.id,
+      content: "",
+      aiSuggestion: suggestion,
+      createdAt: new Date().toISOString()
+    };
+    
+    saveTaskNotes([...taskNotes, newNote]);
+    setNewTaskContent("");
+    setIsAddingTask(null);
+  };
+
+  // Delete custom task
+  const deleteTask = (semesterIndex: number, taskId: string) => {
+    const updatedSemesters = [...roadmapSemesters];
+    updatedSemesters[semesterIndex].tasks = updatedSemesters[semesterIndex].tasks.filter(task => task.id !== taskId);
+    setRoadmapSemesters(updatedSemesters);
+    
+    // Remove associated notes
+    const updatedNotes = taskNotes.filter(note => note.taskId !== taskId);
+    saveTaskNotes(updatedNotes);
+  };
+
+  if (selectedTask) {
+    return <TaskNotesView 
+      taskId={selectedTask} 
+      taskNotes={taskNotes}
+      saveTaskNotes={saveTaskNotes}
+      generateAISuggestion={generateAISuggestion}
+      roadmapData={roadmapData}
+      onBack={() => setSelectedTask(null)}
+    />;
+  }
 
   return (
     <div className="py-20 bg-background">
@@ -251,7 +360,7 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
           <div className="absolute top-16 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full"></div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {sampleRoadmap.map((semester, index) => (
+            {roadmapSemesters.map((semester, index) => (
               <div key={index} className="relative">
                 {/* Timeline node */}
                 <div className="absolute top-12 left-1/2 transform -translate-x-1/2 bg-background border-4 border-border rounded-full p-2 z-10">
@@ -272,7 +381,11 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                           return priorityOrder[a.priority] - priorityOrder[b.priority];
                         })
                         .map((task, taskIndex) => (
-                        <div key={taskIndex} className="p-3 rounded-lg bg-muted/20 border border-muted/30">
+                        <div 
+                          key={taskIndex} 
+                          className="p-3 rounded-lg bg-muted/20 border border-muted/30 cursor-pointer hover:bg-muted/30 transition-colors"
+                          onClick={() => handleTaskClick(task)}
+                        >
                           <div className="flex items-start gap-2 mb-2">
                             <task.icon className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
@@ -287,6 +400,19 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                                     Premium
                                   </Badge>
                                 )}
+                                {task.isCustom && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-xs h-6 px-1 text-destructive hover:text-destructive"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteTask(index, task.id);
+                                    }}
+                                  >
+                                    ×
+                                  </Button>
+                                )}
                               </div>
                               <h4 className="font-medium text-sm text-foreground">{task.title}</h4>
                               <p className="text-xs text-muted-foreground">{task.description}</p>
@@ -299,6 +425,7 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                                       variant="outline"
                                       size="sm"
                                       className="text-xs h-6 px-2 w-full justify-between"
+                                      onClick={(e) => e.stopPropagation()}
                                     >
                                       {link}
                                       <ExternalLink className="w-3 h-3" />
@@ -310,6 +437,57 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                           </div>
                         </div>
                       ))}
+                      
+                      {/* Add Task Button */}
+                      {isAddingTask === `semester-${index}` ? (
+                        <div className="p-3 rounded-lg bg-muted/20 border-2 border-dashed border-primary/30">
+                          <input
+                            type="text"
+                            placeholder="Add a custom task..."
+                            value={newTaskContent}
+                            onChange={(e) => setNewTaskContent(e.target.value)}
+                            className="w-full p-2 bg-background border border-border rounded text-sm"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && newTaskContent.trim()) {
+                                addCustomTask(index, newTaskContent.trim());
+                              }
+                            }}
+                          />
+                          <div className="flex gap-2 mt-2">
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                if (newTaskContent.trim()) {
+                                  addCustomTask(index, newTaskContent.trim());
+                                }
+                              }}
+                              className="text-xs h-6"
+                            >
+                              Add
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setIsAddingTask(null);
+                                setNewTaskContent("");
+                              }}
+                              className="text-xs h-6"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs h-8 border-dashed"
+                          onClick={() => setIsAddingTask(`semester-${index}`)}
+                        >
+                          + Add Custom Task
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -318,84 +496,11 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
           </div>
         </div>
 
-        {/* Personal Notes Section */}
-        <div className="mt-20">
-          <Card className="bg-gradient-to-r from-secondary/5 to-accent/5 border-secondary/20">
-            <CardHeader>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <FileText className="w-6 h-6 text-secondary" />
-                Your Personal Notes
-              </CardTitle>
-              <CardDescription>
-                Keep track of your thoughts, goals, and important reminders for your career journey
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {!isEditingNotes ? (
-                  <div className="space-y-4">
-                    {savedNotes ? (
-                      <div className="p-4 bg-muted/20 rounded-lg border border-muted/30">
-                        <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-                          {savedNotes}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-8 text-center border-2 border-dashed border-muted/30 rounded-lg">
-                        <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground mb-4">
-                          No notes yet. Add your first note to keep track of your career progress!
-                        </p>
-                      </div>
-                    )}
-                    <Button 
-                      onClick={handleEditNotes}
-                      className="flex items-center gap-2"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                      {savedNotes ? "Edit Notes" : "Add Notes"}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <Textarea
-                      placeholder="Write your notes here... 
-
-Examples:
-• Personal goals and milestones
-• Important deadlines and reminders  
-• Networking contacts and opportunities
-• Skills you want to develop
-• Companies you're interested in
-• Interview preparation notes
-• Career advice you've received"
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      className="min-h-[200px] text-base leading-relaxed resize-none bg-background/50"
-                    />
-                    <div className="flex items-center gap-3">
-                      <Button 
-                        onClick={handleSaveNotes}
-                        className="flex items-center gap-2"
-                      >
-                        <Save className="w-4 h-4" />
-                        Save Notes
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        onClick={() => {
-                          setIsEditingNotes(false);
-                          setNotes(savedNotes);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Instructions */}
+        <div className="mt-12 text-center">
+          <p className="text-muted-foreground text-lg">
+            💡 Click on any task to add personal notes and get AI recommendations
+          </p>
         </div>
 
         {/* Expert Section */}
