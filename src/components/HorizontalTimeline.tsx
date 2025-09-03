@@ -42,7 +42,7 @@ interface Task {
 }
 
 const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
-  const [selectedTask, setSelectedTask] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const [taskNotes, setTaskNotes] = useState<TaskNote[]>([]);
   const [newTaskContent, setNewTaskContent] = useState("");
   const [isAddingTask, setIsAddingTask] = useState<string | null>(null);
@@ -52,6 +52,7 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   
   const { 
+    taskProgress,
     toggleTask, 
     getTaskCompletion, 
     getSemesterProgress, 
@@ -694,7 +695,7 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
 
   // Handle task click to show notes
   const handleTaskClick = (task: Task) => {
-    setSelectedTask(task.id);
+    setSelectedTask(task);
   };
 
   // Add custom task
@@ -738,17 +739,6 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
     const updatedNotes = taskNotes.filter(note => note.taskId !== taskId);
     saveTaskNotes(updatedNotes);
   };
-
-  if (selectedTask) {
-    return <TaskNotesView 
-      taskId={selectedTask} 
-      taskNotes={taskNotes}
-      saveTaskNotes={saveTaskNotes}
-      generateAISuggestion={generateAISuggestion}
-      roadmapData={roadmapData}
-      onBack={() => setSelectedTask(null)}
-    />;
-  }
 
   return (
     <div className="py-20 bg-background">
@@ -846,14 +836,14 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                         <div 
                           key={taskIndex} 
                           className="p-3 rounded-lg bg-muted/20 border border-muted/30 cursor-pointer hover:bg-muted/30 transition-colors group"
-                          onClick={() => {
-                            if (task.isPremium && semester.status === "future") {
-                              setPremiumModalTrigger("task-click");
-                              setShowPremiumModal(true);
-                            } else {
-                              handleTaskClick(task);
-                            }
-                          }}
+          onClick={() => {
+            if (task.isPremium && semester.status === "future") {
+              setPremiumModalTrigger("task-click");
+              setShowPremiumModal(true);
+             } else {
+               setSelectedTask(task);
+             }
+          }}
                         >
                           <div className="flex items-start gap-2 mb-2">
                             <div className="flex items-center gap-2 mt-0.5">
@@ -1034,6 +1024,22 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
             </div>
           </div>
         </div>
+
+        {/* Task Notes Modal */}
+        {selectedTask && (
+          <TaskNotesView
+            isOpen={!!selectedTask}
+            onClose={() => setSelectedTask(null)}
+            task={selectedTask}
+            userProfile={{
+              majors: roadmapData?.majors || [],
+              career: roadmapData?.career || "",
+              university: roadmapData?.university || "",
+              year: roadmapData?.year || ""
+            }}
+            completedTasks={Object.keys(taskProgress).filter(taskId => taskProgress[taskId])}
+          />
+        )}
 
         {/* Premium Modal */}
         <PremiumModal 
