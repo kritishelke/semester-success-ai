@@ -34,9 +34,7 @@ const ProgressRing = ({ progress, size = "md", className, showPercentage = false
   
   const getProgressColor = (progress: number) => {
     if (progress === 0) return "stroke-muted-foreground/30";
-    if (progress < 30) return "stroke-destructive";
-    if (progress < 70) return "stroke-accent";
-    return "stroke-primary";
+    return "stroke-green-500";
   };
 
   return (

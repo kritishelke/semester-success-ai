@@ -6,7 +6,9 @@ import { useState, useEffect } from "react";
 import TaskNotesView from "./TaskNotesView";
 import PremiumModal from "./PremiumModal";
 import ProgressRing from "./ProgressRing";
+import WeeklyCalendar from "./WeeklyCalendar";
 import { useTaskProgress } from "@/hooks/useTaskProgress";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface HorizontalTimelineProps {
   roadmapData?: {
@@ -50,6 +52,8 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [premiumModalTrigger, setPremiumModalTrigger] = useState<"sneak-peek" | "task-click" | "completion">("sneak-peek");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [expandedSemester, setExpandedSemester] = useState<number | null>(null);
+  const [showWeeklyCalendar, setShowWeeklyCalendar] = useState(false);
   
   const { 
     taskProgress,
@@ -778,34 +782,81 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                 </div>
                 
                 {/* Content */}
-                <Card className={`mt-20 transition-all duration-300 ${
+                <Card className={`mt-20 transition-all duration-300 cursor-pointer ${
                   semester.status === "future" 
-                    ? "bg-card/40 backdrop-blur-sm border-border/10 shadow-sm" 
+                    ? "bg-card/20 backdrop-blur-lg border-border/5 shadow-sm opacity-30 grayscale blur-[2px]" 
+                    : semester.status === "upcoming"
+                    ? "bg-card/50 backdrop-blur-md border-border/10 shadow-sm opacity-70 blur-[1px]"
                     : "bg-card/80 backdrop-blur-sm border-border/20 shadow-md hover:shadow-lg"
-                }`}>
+                }`}
+                onClick={() => {
+                  if (semester.status === "future") {
+                    setPremiumModalTrigger("sneak-peek");
+                    setShowPremiumModal(true);
+                  } else {
+                    setExpandedSemester(expandedSemester === index ? null : index);
+                    if (semester.status === "current" && expandedSemester !== index) {
+                      setShowWeeklyCalendar(false);
+                    }
+                  }
+                }}
+                >
                   <CardHeader className="text-center">
                     <div className="flex items-center justify-center gap-3 mb-2">
                       <CardTitle className="text-lg">{semester.semester}</CardTitle>
-                      {semester.status === "current" && (
+                      {(semester.status === "current" || semester.status === "upcoming") && (
                         <ProgressRing 
                           progress={getSemesterProgress(semester.tasks)} 
                           size="sm" 
                           showPercentage={false}
                         />
                       )}
+                      {semester.status !== "future" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="p-1 h-auto"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedSemester(expandedSemester === index ? null : index);
+                          }}
+                        >
+                          {expandedSemester === index ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </Button>
+                      )}
                     </div>
                     <CardDescription className="text-sm font-medium">{semester.year}</CardDescription>
                     
-                    {semester.status === "current" && (
+                    {(semester.status === "current" || semester.status === "upcoming") && (
                       <div className="mt-2 text-xs text-muted-foreground">
                         {getCompletedTasksCount(semester.tasks).completed} of {getCompletedTasksCount(semester.tasks).total} tasks completed
+                      </div>
+                    )}
+
+                    {semester.status === "current" && expandedSemester === index && (
+                      <div className="mt-3 pt-3 border-t border-border/20">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowWeeklyCalendar(!showWeeklyCalendar);
+                          }}
+                        >
+                          {showWeeklyCalendar ? "Hide" : "Show"} Weekly Planner
+                        </Button>
                       </div>
                     )}
                   </CardHeader>
                   <CardContent className={semester.status === "future" ? "relative" : ""}>
                     {/* Future semester blur overlay */}
                     {semester.status === "future" && (
-                      <div className="absolute inset-0 bg-background/30 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                      <div className="absolute inset-0 bg-background/50 backdrop-blur-md rounded-lg flex items-center justify-center z-10">
                         <div className="text-center p-4">
                           <Crown className="w-8 h-8 text-primary mx-auto mb-2" />
                           <p className="text-sm font-medium text-foreground mb-2">Premium Preview</p>
@@ -813,7 +864,8 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                           <Button 
                             size="sm" 
                             className="text-xs"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setPremiumModalTrigger("sneak-peek");
                               setShowPremiumModal(true);
                             }}
@@ -825,14 +877,15 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                       </div>
                     )}
                     
-                    <div className="space-y-3">
-                      {/* Show limited tasks for future semesters */}
-                      {(semester.status === "future" ? semester.tasks.slice(0, 2) : semester.tasks)
-                        .sort((a, b) => {
-                          const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-                          return priorityOrder[a.priority] - priorityOrder[b.priority];
-                        })
-                         .map((task, taskIndex) => (
+                    {expandedSemester === index && (
+                      <div className="space-y-3">
+                        {/* Show all tasks when expanded */}
+                        {semester.tasks
+                          .sort((a, b) => {
+                            const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+                            return priorityOrder[a.priority] - priorityOrder[b.priority];
+                          })
+                           .map((task, taskIndex) => (
                         <div 
                           key={taskIndex} 
                           className="p-3 rounded-lg bg-muted/20 border border-muted/30 cursor-pointer hover:bg-muted/30 transition-colors group"
@@ -991,14 +1044,30 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                          </Button>
                        )}
                          </>
-                       )}
-                     </div>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Weekly Calendar - only show when current semester is expanded and calendar is toggled */}
+        {showWeeklyCalendar && expandedSemester !== null && roadmapSemesters[expandedSemester]?.status === "current" && (
+          <div className="mt-8">
+            <WeeklyCalendar 
+              tasks={roadmapSemesters[expandedSemester].tasks.map(task => ({
+                id: task.id,
+                title: task.title,
+                priority: task.priority,
+                completed: getTaskCompletion(task.id)
+              }))}
+              onTaskToggle={toggleTask}
+            />
+          </div>
+        )}
 
         {/* Instructions */}
         <div className="mt-12 text-center space-y-4">
