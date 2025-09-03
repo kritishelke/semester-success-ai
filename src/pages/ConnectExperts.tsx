@@ -1,211 +1,218 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageCircle, Star, MapPin, Briefcase, GraduationCap } from "lucide-react";
+import ExpertsDirectory from "@/components/ExpertsDirectory";
+import ExpertChatModal from "@/components/ExpertChatModal";
+import { Users, Star, MessageCircle, Calendar, Crown, ArrowRight } from "lucide-react";
+
+interface Expert {
+  id: string;
+  name: string;
+  title: string;
+  company: string;
+  major: string;
+  university: string;
+  rating: number;
+  reviewCount: number;
+  responseTime: string;
+  isPremium: boolean;
+  avatar?: string;
+  bio: string;
+  specialties: string[];
+}
 
 const ConnectExperts = () => {
-  const experts = [
-    {
-      id: 1,
-      name: "Sarah Chen",
-      role: "Senior Software Engineer",
-      company: "Google",
-      major: "Computer Science",
-      minor: "Data Science",
-      university: "Stanford University",
-      rating: 4.9,
-      sessions: 127,
-      location: "San Francisco, CA",
-      expertise: ["Software Engineering", "Technical Interviews", "Career Growth"],
-      bio: "5+ years at Google, specialized in helping CS majors transition to big tech companies.",
-      price: "$50/session"
-    },
-    {
-      id: 2,
-      name: "Michael Rodriguez",
-      role: "Investment Banking VP",
-      company: "Goldman Sachs",
-      major: "Finance",
-      minor: "Economics", 
-      university: "University of Pennsylvania",
-      rating: 4.8,
-      sessions: 89,
-      location: "New York, NY",
-      expertise: ["Investment Banking", "Financial Analysis", "Networking"],
-      bio: "Former analyst turned VP, expert in finance career paths and Wall Street transitions.",
-      price: "$75/session"
-    },
-    {
-      id: 3,
-      name: "Dr. Emily Johnson",
-      role: "Product Manager",
-      company: "Microsoft",
-      major: "Psychology",
-      minor: "Business Administration",
-      university: "Harvard University", 
-      rating: 4.9,
-      sessions: 156,
-      location: "Seattle, WA",
-      expertise: ["Product Management", "User Research", "Career Pivoting"],
-      bio: "Psychology major who transitioned to tech PM. Helps students leverage diverse backgrounds.",
-      price: "$60/session"
-    }
+  const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
+  const [showChatModal, setShowChatModal] = useState(false);
+
+  // Mock user profile - in real app this would come from auth context
+  const userProfile = {
+    majors: ["Physics", "Data Science"],
+    minors: ["Mathematics"],
+    career: "Quantitative Analyst",
+    university: "University of Virginia",
+    year: "Junior"
+  };
+
+  const handleExpertSelect = (expert: Expert) => {
+    setSelectedExpert(expert);
+    setShowChatModal(true);
+  };
+
+  const stats = [
+    { label: "Industry Experts", value: "500+", icon: Users },
+    { label: "Average Rating", value: "4.8", icon: Star },
+    { label: "Response Time", value: "< 4hrs", icon: MessageCircle },
+    { label: "Success Rate", value: "94%", icon: Crown }
   ];
 
   return (
     <div className="pt-20 min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-6 py-16">
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        {/* Hero Section */}
         <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <Users className="w-4 h-4" />
+            Connect with Industry Leaders
+          </div>
+          
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-            Connect with Experts
+            Learn from Those Who've
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent block">
+              Made It
+            </span>
           </h1>
+          
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Get personalized guidance from professionals who share your academic background
-            and career aspirations. Connect with experts in your field who have the same
-            major and minor combinations to receive targeted mentorship and advice.
+            Connect with alumni and industry professionals who share your academic background and career aspirations. 
+            Get personalized guidance, insider tips, and mentorship from experts who've walked your path.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <Badge variant="secondary" className="text-sm py-2 px-4">
-              Same Major/Minor Match
-            </Badge>
-            <Badge variant="secondary" className="text-sm py-2 px-4">
-              Industry Experts
-            </Badge>
-            <Badge variant="secondary" className="text-sm py-2 px-4">
-              1-on-1 Mentorship
-            </Badge>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="text-lg px-8">
+              <MessageCircle className="w-5 h-5 mr-2" />
+              Start Connecting
+            </Button>
+            <Button variant="outline" size="lg" className="text-lg px-8">
+              <Calendar className="w-5 h-5 mr-2" />
+              Browse Mentors
+            </Button>
           </div>
         </div>
 
-        {/* Expert Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {experts.map((expert) => (
-            <Card key={expert.id} className="bg-card/80 backdrop-blur-sm border-border/20 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardHeader>
-                <div className="flex items-start gap-4">
-                  <Avatar className="w-16 h-16">
-                    <AvatarImage src={`/api/placeholder/64/64`} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      {expert.name.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <CardTitle className="text-xl text-foreground">{expert.name}</CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      {expert.role} at {expert.company}
-                    </CardDescription>
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-accent text-accent" />
-                        <span className="text-sm font-semibold text-foreground">{expert.rating}</span>
-                      </div>
-                      <span className="text-sm text-muted-foreground">({expert.sessions} sessions)</span>
-                    </div>
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {stats.map((stat, index) => {
+            const IconComponent = stat.icon;
+            return (
+              <Card key={index} className="bg-card/60 border-border/20 text-center">
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <IconComponent className="w-6 h-6 text-primary" />
                   </div>
+                  <div className="text-2xl font-bold text-foreground mb-1">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* How It Works */}
+        <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20 mb-16">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">How Expert Connect Works</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-primary" />
                 </div>
-              </CardHeader>
+                <h3 className="font-semibold mb-2">1. Browse Experts</h3>
+                <p className="text-sm text-muted-foreground">
+                  Find professionals who share your major, university, or career goals. Filter by industry, experience, and specialties.
+                </p>
+              </div>
               
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4 text-primary" />
-                    <span className="text-sm text-foreground">{expert.university}</span>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="w-8 h-8 text-secondary" />
+                </div>
+                <h3 className="font-semibold mb-2">2. Start Conversations</h3>
+                <p className="text-sm text-muted-foreground">
+                  Send personalized messages to experts. Get advice on career paths, interview prep, and industry insights.
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Star className="w-8 h-8 text-accent" />
+                </div>
+                <h3 className="font-semibold mb-2">3. Build Relationships</h3>
+                <p className="text-sm text-muted-foreground">
+                  Schedule calls, get resume reviews, and build long-term mentorship relationships that accelerate your career.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Featured Success Story */}
+        <Card className="bg-card/80 border-border/20 mb-16">
+          <CardContent className="p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <Badge className="mb-4 bg-accent/10 text-accent border-accent/20">
+                  Success Story
+                </Badge>
+                <h3 className="text-2xl font-bold text-foreground mb-4">
+                  "Connected with my dream mentor in 24 hours"
+                </h3>
+                <p className="text-muted-foreground mb-6 leading-relaxed">
+                  "As a UVA Physics major interested in quant finance, I was struggling to understand the career path. 
+                  Through Timeline's expert network, I connected with Michael Rodriguez, a UVA alum now at Two Sigma. 
+                  His guidance was invaluable - from course recommendations to interview prep. I just landed my dream internship!"
+                </p>
+                <div className="flex items-center gap-4">
+                  <div>
+                    <div className="font-semibold text-foreground">Sarah Kim</div>
+                    <div className="text-sm text-muted-foreground">Junior, Physics Major</div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-primary" />
-                    <span className="text-sm text-foreground">{expert.major}</span>
-                    {expert.minor && (
-                      <span className="text-sm text-muted-foreground">• {expert.minor}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="text-sm text-foreground">{expert.location}</span>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <div className="font-semibold text-foreground">Quantitative Analyst Intern</div>
+                    <div className="text-sm text-muted-foreground">Jane Street Capital</div>
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-foreground">Expertise:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {expert.expertise.map((skill, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <p className="text-sm text-muted-foreground">{expert.bio}</p>
-
-                <div className="flex items-center justify-between pt-4">
-                  <span className="text-lg font-bold text-accent">{expert.price}</span>
-                  <Button size="sm" className="gap-2">
-                    <MessageCircle className="w-4 h-4" />
-                    Connect
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* How It Works Section */}
-        <div className="bg-card/50 rounded-2xl p-8 mb-16">
-          <h2 className="text-3xl font-bold text-center text-foreground mb-8">
-            How Expert Matching Works
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary">1</span>
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">
-                Share Your Profile
-              </h3>
-              <p className="text-muted-foreground">
-                Tell us your major, minor, university, and career goals to find the perfect expert match.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary">2</span>
+              <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg p-8 text-center">
+                <div className="text-4xl font-bold text-primary mb-2">94%</div>
+                <div className="text-sm text-muted-foreground mb-4">Success Rate</div>
+                <div className="text-2xl font-bold text-secondary mb-2">&lt; 4 hours</div>
+                <div className="text-sm text-muted-foreground mb-4">Average Response Time</div>
+                <div className="text-2xl font-bold text-accent mb-2">500+</div>
+                <div className="text-sm text-muted-foreground">Industry Experts</div>
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">
-                Get Matched
-              </h3>
-              <p className="text-muted-foreground">
-                Our algorithm connects you with experts who have your exact academic background and career path.
-              </p>
             </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary">3</span>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">
-                Schedule & Chat
-              </h3>
-              <p className="text-muted-foreground">
-                Book 1-on-1 sessions for personalized mentorship, career advice, and networking opportunities.
-              </p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* CTA Section */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Ready to Connect with Your Mentor?
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of students who have accelerated their career growth through expert mentorship.
-          </p>
-          <Button size="lg" className="text-lg py-6 px-12">
-            Find My Expert Match
-          </Button>
-        </div>
+        {/* Premium Features Teaser */}
+        <Card className="bg-gradient-to-r from-accent/5 to-primary/5 border-accent/20 mb-16">
+          <CardContent className="p-8 text-center">
+            <Crown className="w-12 h-12 text-accent mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-foreground mb-4">Unlock Premium Expert Access</h3>
+            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+              Premium members get unlimited messaging, priority responses, exclusive 1:1 video calls, 
+              and access to our most elite professionals from top companies.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90">
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade to Premium
+              </Button>
+              <Button variant="outline">
+                Learn More
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Experts Directory */}
+        <ExpertsDirectory 
+          userProfile={userProfile}
+          onExpertSelect={handleExpertSelect}
+        />
+
+        {/* Expert Chat Modal */}
+        <ExpertChatModal
+          isOpen={showChatModal}
+          onClose={() => setShowChatModal(false)}
+          expert={selectedExpert}
+          userProfile={userProfile}
+        />
       </div>
     </div>
   );
