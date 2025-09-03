@@ -5,6 +5,7 @@ import { Select as UISelect, SelectContent, SelectItem, SelectTrigger, SelectVal
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import HorizontalTimeline from "@/components/HorizontalTimeline";
+import FutureGoalSelector from "@/components/FutureGoalSelector";
 import ReactSelect from 'react-select';
 
 const CreateRoadmap = () => {
@@ -15,6 +16,8 @@ const CreateRoadmap = () => {
   const [career, setCareer] = useState("");
   const [university, setUniversity] = useState("");
   const [preProfessional, setPreProfessional] = useState("");
+  const [futureGoal, setFutureGoal] = useState("");
+  const [graduateDegree, setGraduateDegree] = useState("");
   const [roadmapData, setRoadmapData] = useState(null);
   const [showTimeline, setShowTimeline] = useState(false);
 
@@ -104,7 +107,9 @@ const CreateRoadmap = () => {
         year, 
         career, 
         university, 
-        preProfessional 
+        preProfessional,
+        futureGoal,
+        graduateDegree
       };
       setRoadmapData(data);
       setShowTimeline(true);
@@ -303,10 +308,10 @@ const CreateRoadmap = () => {
                       ))}
                     </SelectContent>
                    </UISelect>
-                </div>
+                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="career" className="text-lg font-medium">Career Goal *</Label>
+                 <div className="space-y-3">
+                   <Label htmlFor="career" className="text-lg font-medium">Career Goal *</Label>
                   <UISelect value={career} onValueChange={setCareer}>
                     <SelectTrigger className="h-12 text-lg">
                       <SelectValue placeholder="Select your target career" />
@@ -316,11 +321,20 @@ const CreateRoadmap = () => {
                         <SelectItem key={c} value={c}>{c}</SelectItem>
                       ))}
                     </SelectContent>
-                  </UISelect>
-                </div>
-              </div>
+                   </UISelect>
+                 </div>
+               </div>
 
-              <div className="pt-8">
+               <div className="border-t border-border/50 pt-8">
+                 <FutureGoalSelector
+                   futureGoal={futureGoal}
+                   setFutureGoal={setFutureGoal}
+                   graduateDegree={graduateDegree}
+                   setGraduateDegree={setGraduateDegree}
+                 />
+               </div>
+
+               <div className="pt-8">
                 <Button 
                   type="submit" 
                   variant="accent" 
