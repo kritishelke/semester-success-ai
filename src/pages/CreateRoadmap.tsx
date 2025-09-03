@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import HorizontalTimeline from "@/components/HorizontalTimeline";
 import FutureGoalSelector from "@/components/FutureGoalSelector";
+import OpportunitiesHub from "@/components/OpportunitiesHub";
+import AdaptivePlanningEngine from "@/components/AdaptivePlanningEngine";
 import ReactSelect from 'react-select';
 
 const CreateRoadmap = () => {
@@ -20,6 +22,7 @@ const CreateRoadmap = () => {
   const [graduateDegree, setGraduateDegree] = useState("");
   const [roadmapData, setRoadmapData] = useState(null);
   const [showTimeline, setShowTimeline] = useState(false);
+  const [activePhase, setActivePhase] = useState<"roadmap" | "opportunities" | "adaptive">("roadmap");
 
   const majorsList = [
     "Accounting", "Aerospace Engineering", "African Studies", "Agricultural Business", 
@@ -128,8 +131,36 @@ const CreateRoadmap = () => {
             >
               ← Back to Form
             </Button>
+            
+            {/* Phase Navigation */}
+            <div className="flex justify-center gap-2 mb-6">
+              <Button
+                variant={activePhase === "roadmap" ? "default" : "outline"}
+                onClick={() => setActivePhase("roadmap")}
+                size="sm"
+              >
+                Roadmap
+              </Button>
+              <Button
+                variant={activePhase === "opportunities" ? "default" : "outline"}
+                onClick={() => setActivePhase("opportunities")}
+                size="sm"
+              >
+                Opportunities Hub
+              </Button>
+              <Button
+                variant={activePhase === "adaptive" ? "default" : "outline"}
+                onClick={() => setActivePhase("adaptive")}
+                size="sm"
+              >
+                Adaptive Planning
+              </Button>
+            </div>
           </div>
-          <HorizontalTimeline roadmapData={roadmapData} />
+          
+          {activePhase === "roadmap" && <HorizontalTimeline roadmapData={roadmapData} />}
+          {activePhase === "opportunities" && <OpportunitiesHub roadmapData={roadmapData} />}
+          {activePhase === "adaptive" && <AdaptivePlanningEngine roadmapData={roadmapData} />}
         </div>
       </div>
     );
