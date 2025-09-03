@@ -98,37 +98,63 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
       }
     };
 
-    // Generate timeline based on current year
-    for (let i = yearIndex; i < 4; i++) {
-      const yearNames = ["Freshman", "Sophomore", "Junior", "Senior"];
-      const currentYear = yearNames[i];
+  // Generate timeline based on current year
+  for (let i = yearIndex; i < 4; i++) {
+    const yearNames = ["Freshman", "Sophomore", "Junior", "Senior"];
+    const currentYear = yearNames[i];
+    
+    if (i === yearIndex) {
+      // Current semester
+      remainingSemesters.push({
+        semester: "Current",
+        year: `${currentYear} ${new Date().getMonth() >= 8 ? 'Fall' : 'Spring'}`,
+        status: "current",
+        tasks: generateCurrentTasks(data, currentYear)
+      });
       
-      if (i === yearIndex) {
-        // Current semester
+      // Next semester
+      remainingSemesters.push({
+        semester: "Next",
+        year: `${currentYear} ${new Date().getMonth() >= 8 ? 'Spring' : 'Fall'}`,
+        status: "upcoming", 
+        tasks: generateUpcomingTasks(data, currentYear)
+      });
+      
+      // Summer after current year
+      remainingSemesters.push({
+        semester: "Summer",
+        year: `Summer ${new Date().getFullYear() + (i - yearIndex) + 1}`,
+        status: "upcoming",
+        tasks: generateSummerTasks(data, currentYear)
+      });
+    } else {
+      // Future years - Fall
+      remainingSemesters.push({
+        semester: `${currentYear} Fall`,
+        year: `${currentYear} Fall Semester`,
+        status: "future",
+        tasks: generateFallTasks(data, currentYear)
+      });
+      
+      // Future years - Spring
+      remainingSemesters.push({
+        semester: `${currentYear} Spring`,
+        year: `${currentYear} Spring Semester`,
+        status: "future",
+        tasks: generateSpringTasks(data, currentYear)
+      });
+      
+      // Future summers
+      if (i < 3) { // Don't add summer after senior year
         remainingSemesters.push({
-          semester: "Current",
-          year: `${currentYear} ${new Date().getMonth() >= 8 ? 'Fall' : 'Spring'}`,
-          status: "current",
-          tasks: generateCurrentTasks(data, currentYear)
-        });
-        
-        // Next semester
-        remainingSemesters.push({
-          semester: "Next",
-          year: `${currentYear} ${new Date().getMonth() >= 8 ? 'Spring' : 'Fall'}`,
-          status: "upcoming", 
-          tasks: generateUpcomingTasks(data, currentYear)
-        });
-      } else {
-        // Future years
-        remainingSemesters.push({
-          semester: `${currentYear} Year`,
-          year: `${currentYear} Fall & Spring`,
+          semester: "Summer",
+          year: `Summer ${new Date().getFullYear() + (i - yearIndex) + 1}`,
           status: "future",
-          tasks: generateFutureTasks(data, currentYear)
+          tasks: generateSummerTasks(data, currentYear)
         });
       }
     }
+  }
 
     return remainingSemesters;
   };
@@ -136,56 +162,139 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
   const generateCurrentTasks = (data: any, year: string) => {
     const tasks = [];
     const major = data.majors[0];
+    const career = data.career;
     const university = data.university;
     
-    // Academic courses based on major and university
-    if (major === "Physics" && university === "University of Virginia") {
+    // Physics + Quantitative Analyst specific
+    if (major === "Physics" && career === "Quantitative Analyst" && university === "University of Virginia") {
       tasks.push({
         id: `task-${Date.now()}-1`,
         priority: "critical",
         type: "academic",
-        title: "Complete Core Physics Courses",
-        description: "PHYS 3620 - Mathematical Physics, focus on analytical methods",
+        title: "Master Python & R Programming",
+        description: "Focus on NumPy, Pandas, SciPy, matplotlib for quantitative analysis",
         icon: GraduationCap
       });
       
       tasks.push({
-        id: `task-${Date.now()}-2`, 
-        priority: "high",
+        id: `task-${Date.now()}-2`,
+        priority: "critical", 
         type: "academic",
-        title: "Take PDE Course",
-        description: "MATH 4220 - Partial Differential Equations (Spring offering)",
+        title: "Linear Algebra & Calculus Review",
+        description: "Khan Academy, MIT OpenCourseWare - essential for quant work",
         icon: GraduationCap
       });
-    } else if (major === "Computer Science") {
+      
       tasks.push({
         id: `task-${Date.now()}-3`,
-        priority: "critical",
-        type: "academic", 
-        title: "Complete Algorithms Course",
-        description: "CS 4102 - Algorithms, essential for technical interviews",
-        icon: GraduationCap
-      });
-    }
-
-    // Career-specific tasks
-    if (data.career === "Data Scientist") {
-      tasks.push({
-        id: `task-${Date.now()}-4`,
         priority: "high",
         type: "skill",
-        title: "Data Science Coursework",
-        description: university === "University of Virginia" ? "CS 4774 - Machine Learning, STAT 4995 - Applied Statistics" : "Take machine learning and statistics courses",
+        title: "Start 'Quantitative Finance' by Wilmott",
+        description: "Build theoretical foundation in mathematical finance",
         icon: Clock
       });
       
       tasks.push({
+        id: `task-${Date.now()}-4`,
+        priority: "high",
+        type: "networking",
+        title: "Join Finance/Quant Clubs at School",
+        description: "Network and learn from peers in quantitative finance",
+        icon: Users
+      });
+      
+      tasks.push({
         id: `task-${Date.now()}-5`,
-        priority: "medium", 
+        priority: "medium",
+        type: "career",
+        title: "Apply for Spring Finance Internships",
+        description: "Target asset management and trading firms",
+        icon: Briefcase
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-6`,
+        priority: "medium",
+        type: "skill",
+        title: "Practice Monte Carlo Simulations",
+        description: "Learn to model financial scenarios and risk assessment",
+        icon: Zap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-7`,
+        priority: "low",
+        type: "skill",
+        title: "LeetCode Practice (Quant Focus)",
+        description: "2-3 problems daily, focus on probability and algorithms",
+        icon: Zap
+      });
+    } 
+    // Physics + Data Scientist
+    else if (major === "Physics" && career === "Data Scientist") {
+      tasks.push({
+        id: `task-${Date.now()}-8`,
+        priority: "critical",
+        type: "academic",
+        title: "Complete Core Physics Courses",
+        description: "PHYS 3620 - Mathematical Physics, PHYS 4720 - Quantum Mechanics",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-9`,
+        priority: "critical",
+        type: "academic", 
+        title: "Data Science Coursework",
+        description: "CS 4774 - Machine Learning, STAT 4995 - Applied Statistics",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-10`,
+        priority: "high",
+        type: "skill",
+        title: "Master Python for Data Science",
+        description: "Focus on scikit-learn, TensorFlow, and data visualization libraries",
+        icon: Zap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-11`,
+        priority: "medium",
         type: "skill",
         title: "LeetCode Practice",
         description: "Practice 2-3 problems daily, focus on arrays and dynamic programming",
         icon: Zap
+      });
+    }
+    // Computer Science generic
+    else if (major === "Computer Science") {
+      tasks.push({
+        id: `task-${Date.now()}-12`,
+        priority: "critical",
+        type: "academic",
+        title: "Complete Algorithms Course", 
+        description: "CS 4102 - Algorithms, essential for technical interviews",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-13`,
+        priority: "high",
+        type: "skill",
+        title: "Daily LeetCode Practice",
+        description: "Solve 3-5 problems daily, focus on medium difficulty",
+        icon: Zap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-14`,
+        priority: "medium",
+        type: "skill",
+        title: "Build Personal Projects",
+        description: "Create 2-3 substantial projects for your portfolio",
+        icon: Star
       });
     }
 
@@ -194,42 +303,337 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
 
   const generateUpcomingTasks = (data: any, year: string) => {
     const tasks = [];
+    const major = data.majors[0];
+    const career = data.career;
     
+    // Physics + Quantitative Analyst
+    if (major === "Physics" && career === "Quantitative Analyst") {
+      tasks.push({
+        id: `task-${Date.now()}-15`,
+        priority: "critical",
+        type: "academic",
+        title: "Complete Probability & Statistics Course",
+        description: "STAT 3120 - Focus on stochastic processes and time series",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-16`,
+        priority: "critical",
+        type: "skill",
+        title: "Learn SQL and Database Management",
+        description: "Essential for handling financial data in quant roles",
+        icon: Clock
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-17`,
+        priority: "critical",
+        type: "portfolio",
+        title: "Build 2-3 Quant Projects for Portfolio",
+        description: "Portfolio optimization, backtesting, pricing models",
+        icon: Star
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-18`,
+        priority: "high",
+        type: "certification",
+        title: "Start CQF or Similar Online Certification",
+        description: "Certificate in Quantitative Finance for credibility",
+        icon: GraduationCap,
+        isPremium: true
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-19`,
+        priority: "medium",
+        type: "networking",
+        title: "Attend Finance Conferences/Webinars",
+        description: "CFA Institute events, local finance meetups",
+        icon: Users
+      });
+    }
+    
+    // Generic tasks for all paths
     tasks.push({
-      id: `task-${Date.now()}-6`,
+      id: `task-${Date.now()}-20`,
       priority: "critical",
-      type: "internship", 
+      type: "internship",
       title: "Apply for Summer Internships",
       description: "Target 15-20 applications in your field",
       icon: Briefcase,
       isPremium: true
     });
 
-    if (data.career === "Data Scientist") {
+    return tasks;
+  };
+
+  const generateSummerTasks = (data: any, year: string) => {
+    const tasks = [];
+    const major = data.majors[0];
+    const career = data.career;
+    
+    // Physics + Quantitative Analyst summer tasks
+    if (major === "Physics" && career === "Quantitative Analyst") {
       tasks.push({
-        id: `task-${Date.now()}-7`,
+        id: `task-${Date.now()}-21`,
+        priority: "critical",
+        type: "internship",
+        title: "Secure Finance Internship",
+        description: "Investment banks, hedge funds, proprietary trading firms",
+        icon: Briefcase,
+        isPremium: true
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-22`,
+        priority: "critical",
+        type: "skill",
+        title: "If No Internship: Intensive Self-Study",
+        description: "Complete 2 major quant projects, online courses",
+        icon: Clock
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-23`,
+        priority: "high",
+        type: "networking",
+        title: "Network with Finance Professionals",
+        description: "LinkedIn outreach, informational interviews",
+        icon: Users
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-24`,
         priority: "high",
         type: "skill",
-        title: "Build Data Science Portfolio",
-        description: "Create 3-4 projects showcasing different skills",
-        icon: Clock
+        title: "Master Advanced Excel/VBA",
+        description: "Still widely used in finance industry",
+        icon: Zap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-25`,
+        priority: "high",
+        type: "skill",
+        title: "Study Derivatives and Options Pricing",
+        description: "Black-Scholes, Greeks, volatility models",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-26`,
+        priority: "medium",
+        type: "skill",
+        title: "Advanced Monte Carlo Methods",
+        description: "Implement complex financial simulations",
+        icon: Zap
+      });
+    }
+    // Generic summer tasks for other paths
+    else {
+      tasks.push({
+        id: `task-${Date.now()}-27`,
+        priority: "critical",
+        type: "internship",
+        title: "Secure Summer Internship",
+        description: "Gain practical experience in your field",
+        icon: Briefcase,
+        isPremium: true
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-28`,
+        priority: "high",
+        type: "skill",
+        title: "Build Summer Projects",
+        description: "Work on 2-3 substantial projects to enhance your portfolio",
+        icon: Star
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-29`,
+        priority: "medium",
+        type: "networking",
+        title: "Professional Networking",
+        description: "Connect with industry professionals and attend events",
+        icon: Users
       });
     }
 
     return tasks;
   };
 
-  const generateFutureTasks = (data: any, year: string) => {
+  const generateFallTasks = (data: any, year: string) => {
     const tasks = [];
+    const major = data.majors[0];
+    const career = data.career;
     
-    if (year === "Junior") {
+    if (year === "Senior" && major === "Physics" && career === "Quantitative Analyst") {
       tasks.push({
-        id: `task-${Date.now()}-8`,
+        id: `task-${Date.now()}-30`,
+        priority: "critical",
+        type: "career",
+        title: "Apply to Full-Time Quant Positions",
+        description: "Target: Two Sigma, Citadel, Jane Street, DE Shaw",
+        icon: Briefcase,
+        isPremium: true
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-31`,
+        priority: "critical",
+        type: "skill",
+        title: "Prepare for Technical Interviews",
+        description: "Brainteasers, coding challenges, probability problems",
+        icon: Zap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-32`,
+        priority: "high",
+        type: "academic",
+        title: "Complete Advanced Econometrics Course",
+        description: "Time series analysis, ARCH/GARCH models",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-33`,
+        priority: "high",
+        type: "skill",
+        title: "Learn C++ Basics",
+        description: "Required for high-frequency trading roles",
+        icon: Zap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-34`,
+        priority: "medium",
+        type: "competition",
+        title: "Participate in Trading Competitions",
+        description: "Rotman, Wharton trading competitions",
+        icon: Star
+      });
+    } else if (year === "Junior") {
+      tasks.push({
+        id: `task-${Date.now()}-35`,
         priority: "critical",
         type: "experience",
-        title: "Research Experience", 
-        description: "Join a research lab in your field",
+        title: "Join Research Lab",
+        description: "Get hands-on research experience in your field",
         icon: Star
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-36`,
+        priority: "high",
+        type: "academic",
+        title: "Take Advanced Coursework",
+        description: "Enroll in upper-level courses relevant to your career",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-37`,
+        priority: "medium",
+        type: "leadership",
+        title: "Take Leadership Role in Organizations",
+        description: "Lead projects in relevant student organizations",
+        icon: Users
+      });
+    }
+
+    tasks.push({
+      id: `task-${Date.now()}-38`,
+      priority: "low",
+      type: "skill",
+      title: "Maintain Technical Skills",
+      description: "Continue practicing coding and relevant technical skills",
+      icon: Zap
+    });
+
+    return tasks;
+  };
+
+  const generateSpringTasks = (data: any, year: string) => {
+    const tasks = [];
+    const major = data.majors[0];
+    const career = data.career;
+    
+    if (year === "Senior" && major === "Physics" && career === "Quantitative Analyst") {
+      tasks.push({
+        id: `task-${Date.now()}-39`,
+        priority: "critical",
+        type: "career",
+        title: "Complete Interviews and Negotiate Offers",
+        description: "Practice case studies, salary negotiation",
+        icon: Briefcase,
+        isPremium: true
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-40`,
+        priority: "high",
+        type: "portfolio",
+        title: "Maintain and Update Quantitative Portfolio",
+        description: "Showcase latest projects and results",
+        icon: Star
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-41`,
+        priority: "medium",
+        type: "certification",
+        title: "Consider CFA Level 1 Exam",
+        description: "June exam date, if time permits",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-42`,
+        priority: "high",
+        type: "preparation",
+        title: "Prepare for Transition to Work",
+        description: "Review key concepts, industry trends",
+        icon: Clock
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-43`,
+        priority: "high",
+        type: "networking",
+        title: "Build Professional Network",
+        description: "Maintain connections for future opportunities",
+        icon: Users
+      });
+    } else {
+      tasks.push({
+        id: `task-${Date.now()}-44`,
+        priority: "critical", 
+        type: "academic",
+        title: "Complete Spring Coursework", 
+        description: "Focus on courses critical for your career path",
+        icon: GraduationCap
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-45`,
+        priority: "high",
+        type: "preparation",
+        title: "Prepare for Summer Plans",
+        description: "Get ready for internships or summer programs",
+        icon: Clock
+      });
+      
+      tasks.push({
+        id: `task-${Date.now()}-46`,
+        priority: "medium",
+        type: "skill",
+        title: "Continue Skill Development",
+        description: "Work on technical and soft skills",
+        icon: Zap
       });
     }
 
