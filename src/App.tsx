@@ -11,6 +11,8 @@ import ConnectExperts from "./pages/ConnectExperts";
 import FeaturesPage from "./pages/FeaturesPage";
 import NotFound from "./pages/NotFound";
 
+import SemesterDetail from "./pages/SemesterDetail";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -26,6 +28,7 @@ const App = () => (
           <Route path="/create-roadmap" element={<CreateRoadmap />} />
           <Route path="/connect-experts" element={<ConnectExperts />} />
           <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/semester/:semesterType" element={<SemesterDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

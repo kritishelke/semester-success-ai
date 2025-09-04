@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Circle, Clock, Users, Briefcase, GraduationCap, AlertCircle, Zap, Star, ExternalLink, Crown, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import TaskNotesView from "./TaskNotesView";
 import PremiumModal from "./PremiumModal";
 import ProgressRing from "./ProgressRing";
-import WeeklyCalendar from "./WeeklyCalendar";
 import { useTaskProgress } from "@/hooks/useTaskProgress";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -44,16 +44,12 @@ interface Task {
 }
 
 const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
+  const navigate = useNavigate();
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const [taskNotes, setTaskNotes] = useState<TaskNote[]>([]);
-  const [newTaskContent, setNewTaskContent] = useState("");
-  const [isAddingTask, setIsAddingTask] = useState<string | null>(null);
   const [roadmapSemesters, setRoadmapSemesters] = useState<any[]>([]);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [premiumModalTrigger, setPremiumModalTrigger] = useState<"sneak-peek" | "task-click" | "completion">("sneak-peek");
-  const [priorityFilter, setPriorityFilter] = useState<string>("all");
-  const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
-  const [showWeeklyCalendar, setShowWeeklyCalendar] = useState(false);
   
   const { 
     taskProgress,
@@ -680,36 +676,10 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
     setSelectedTask(task);
   };
 
-  // Add custom task
-  const addCustomTask = (semesterIndex: number, taskContent: string) => {
-    const newTask: Task = {
-      id: `custom-${Date.now()}`,
-      priority: "medium",
-      type: "custom",
-      title: taskContent,
-      description: "Custom task added by user",
-      icon: Star,
-      isCustom: true
-    };
-
-    const updatedSemesters = [...roadmapSemesters];
-    updatedSemesters[semesterIndex].tasks.push(newTask);
-    setRoadmapSemesters(updatedSemesters);
-    
-    // Generate AI suggestion
-    const suggestion = generateAISuggestion(taskContent, roadmapData?.majors[0] || "", roadmapData?.career || "");
-    const newNote: TaskNote = {
-      id: `note-${Date.now()}`,
-      taskId: newTask.id,
-      content: "",
-      aiSuggestion: suggestion,
-      createdAt: new Date().toISOString()
-    };
-    
-    saveTaskNotes([...taskNotes, newNote]);
-    setNewTaskContent("");
-    setIsAddingTask(null);
-  };
+  // Add custom task - removed since we navigate to detail page
+  // const addCustomTask = (semesterIndex: number, taskContent: string) => {
+  //   // Implementation removed
+  // };
 
   // Delete custom task
   const deleteTask = (semesterIndex: number, taskId: string) => {
@@ -746,305 +716,107 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
           </div>
         )}
 
-        {/* Two-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Sidebar - Selected Semester Details */}
-          <div className="lg:col-span-1">
-            {selectedSemester !== null && roadmapSemesters[selectedSemester] && (
-              <Card className="sticky top-4">
-                <CardHeader className="text-center">
-                  <div className="flex items-center justify-center gap-3 mb-2">
-                    <CardTitle className="text-lg">
-                      {roadmapSemesters[selectedSemester].semester}
-                    </CardTitle>
-                    <ProgressRing 
-                      progress={getSemesterProgress(roadmapSemesters[selectedSemester].tasks)} 
-                      size="md" 
-                      showPercentage={true}
-                    />
+        {/* Horizontal Timeline with Alternating Layout */}
+        <div className="relative">
+          {/* Timeline line */}
+          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full transform -translate-y-1/2 z-0"></div>
+          
+          <div className="flex items-center justify-between gap-8 py-20">
+            {roadmapSemesters.slice(0, 4).map((semester, index) => {
+              const isAbove = index % 2 === 0;
+              return (
+                <div key={index} className="flex-1 relative">
+                  {/* Timeline node */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background border-4 border-primary rounded-full p-3 z-10">
+                    {getStatusIcon(semester.status)}
                   </div>
-                  <CardDescription className="text-sm font-medium">
-                    {roadmapSemesters[selectedSemester].year}
-                  </CardDescription>
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    {getCompletedTasksCount(roadmapSemesters[selectedSemester].tasks).completed} of {getCompletedTasksCount(roadmapSemesters[selectedSemester].tasks).total} tasks completed
-                  </div>
-
-                  {roadmapSemesters[selectedSemester].status === "current" && (
-                    <div className="mt-3 pt-3 border-t border-border/20">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs"
-                        onClick={() => setShowWeeklyCalendar(!showWeeklyCalendar)}
-                      >
-                        {showWeeklyCalendar ? "Hide" : "Show"} Weekly Planner
-                      </Button>
-                    </div>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {roadmapSemesters[selectedSemester].tasks
-                      .sort((a, b) => {
-                        const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-                        return priorityOrder[a.priority] - priorityOrder[b.priority];
-                      })
-                      .map((task, taskIndex) => (
-                        <div 
-                          key={taskIndex} 
-                          className="p-3 rounded-lg bg-muted/20 border border-muted/30 cursor-pointer hover:bg-muted/30 transition-colors group"
-                          onClick={() => {
-                            if (task.isPremium && roadmapSemesters[selectedSemester].status === "future") {
-                              setPremiumModalTrigger("task-click");
-                              setShowPremiumModal(true);
-                            } else {
-                              setSelectedTask(task);
-                            }
-                          }}
-                        >
-                          <div className="flex items-start gap-2 mb-2">
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <task.icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleTask(task.id);
-                                  
-                                  if (roadmapSemesters[selectedSemester].status === "current" && !getTaskCompletion(task.id)) {
-                                    setPremiumModalTrigger("completion");
-                                    setShowPremiumModal(true);
-                                  }
-                                }}
-                                className="w-4 h-4 rounded border-2 border-muted-foreground hover:border-primary transition-colors flex items-center justify-center"
-                              >
-                                {getTaskCompletion(task.id) && (
-                                  <CheckCircle className="w-3 h-3 text-green-500 fill-current" />
-                                )}
-                              </button>
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge className={`text-xs ${getPriorityColor(task.priority)} px-2 py-0.5 flex items-center gap-1`}>
-                                  {getPriorityIcon(task.priority)}
-                                  {task.priority}
-                                </Badge>
-                                {task.isPremium && (
-                                  <Badge className="text-xs bg-gradient-to-r from-accent to-primary text-white px-2 py-0.5 flex items-center gap-1">
-                                    <Crown className="w-3 h-3" />
-                                    Premium
-                                  </Badge>
-                                )}
-                                {task.isCustom && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-xs h-6 px-1 text-destructive hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      deleteTask(selectedSemester, task.id);
-                                    }}
-                                  >
-                                    ×
-                                  </Button>
-                                )}
-                              </div>
-                              <h4 className={`font-medium text-sm ${getTaskCompletion(task.id) ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                                {task.title}
-                              </h4>
-                              <p className="text-xs text-muted-foreground">{task.description}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    
-                    {/* Add Task Button - only for current/upcoming semesters */}
-                    {roadmapSemesters[selectedSemester].status !== "future" && (
-                      <>
-                        {isAddingTask === `semester-${selectedSemester}` ? (
-                          <div className="p-3 rounded-lg bg-muted/20 border-2 border-dashed border-primary/30">
-                            <input
-                              type="text"
-                              placeholder="Add a custom task..."
-                              value={newTaskContent}
-                              onChange={(e) => setNewTaskContent(e.target.value)}
-                              className="w-full p-2 bg-background border border-border rounded text-sm"
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter' && newTaskContent.trim()) {
-                                  addCustomTask(selectedSemester, newTaskContent.trim());
-                                }
-                              }}
-                            />
-                            <div className="flex gap-2 mt-2">
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  if (newTaskContent.trim()) {
-                                    addCustomTask(selectedSemester, newTaskContent.trim());
-                                  }
-                                }}
-                                className="text-xs h-6"
-                              >
-                                Add
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setIsAddingTask(null);
-                                  setNewTaskContent("");
-                                }}
-                                className="text-xs h-6"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full text-xs h-8 border-dashed"
-                            onClick={() => setIsAddingTask(`semester-${selectedSemester}`)}
-                          >
-                            + Add Custom Task
-                          </Button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Weekly Calendar - when current semester selected and calendar toggled */}
-            {showWeeklyCalendar && selectedSemester !== null && roadmapSemesters[selectedSemester]?.status === "current" && (
-              <div className="mt-4">
-                <WeeklyCalendar 
-                  tasks={roadmapSemesters[selectedSemester].tasks.map(task => ({
-                    id: task.id,
-                    title: task.title,
-                    priority: task.priority,
-                    completed: getTaskCompletion(task.id)
-                  }))}
-                  onTaskToggle={toggleTask}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Right Side - Timeline */}
-          <div className="lg:col-span-2">
-            <div className="relative">
-              {/* Timeline line */}
-              <div className="absolute top-16 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full"></div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {roadmapSemesters.map((semester, index) => (
-                  <div key={index} className="relative">
-                    {/* Timeline node */}
-                    <div className="absolute top-12 left-1/2 transform -translate-x-1/2 bg-background border-4 border-border rounded-full p-2 z-10">
-                      {getStatusIcon(semester.status)}
-                    </div>
-                    
-                    {/* Content */}
-                    <Card className={`mt-20 transition-all duration-300 cursor-pointer ${
-                      semester.status === "future" 
-                        ? "bg-card/10 backdrop-blur-lg border-border/5 shadow-sm opacity-15 grayscale blur-[6px]" 
-                        : semester.status === "upcoming"
-                        ? "bg-card/50 backdrop-blur-md border-border/10 shadow-sm opacity-70 blur-[1px]"
-                        : "bg-card/80 backdrop-blur-sm border-border/20 shadow-md hover:shadow-lg"
-                    } ${selectedSemester === index ? 'ring-2 ring-primary' : ''}`}
-                    onClick={() => {
-                      if (semester.status === "future") {
-                        setPremiumModalTrigger("sneak-peek");
-                        setShowPremiumModal(true);
-                      } else {
-                        setSelectedSemester(selectedSemester === index ? null : index);
-                        setShowWeeklyCalendar(false);
-                      }
-                    }}
-                    >
-                      <CardHeader className="text-center">
-                        <div className="flex items-center justify-center gap-3 mb-2">
-                          <CardTitle className="text-lg">{semester.semester}</CardTitle>
-                          {(semester.status === "current" || semester.status === "upcoming") && (
-                            <ProgressRing 
-                              progress={getSemesterProgress(semester.tasks)} 
-                              size="sm" 
-                              showPercentage={false}
-                            />
-                          )}
-                        </div>
-                        <CardDescription className="text-sm font-medium">{semester.year}</CardDescription>
-                        
+                  
+                  {/* Content positioned above or below */}
+                  <Card className={`
+                    w-full transition-all duration-300 cursor-pointer
+                    ${isAbove ? '-mt-48' : 'mt-16'}
+                    ${semester.status === "future" 
+                      ? "bg-card/5 backdrop-blur-xl border-border/5 shadow-sm opacity-10 grayscale blur-[8px]" 
+                      : semester.status === "upcoming"
+                      ? "bg-card/40 backdrop-blur-lg border-border/10 shadow-sm opacity-60 blur-[2px]"
+                      : "bg-card/80 backdrop-blur-sm border-border/20 shadow-md hover:shadow-xl hover:scale-105"
+                    }
+                  `}
+                  onClick={() => {
+                    if (semester.status === "future") {
+                      setPremiumModalTrigger("sneak-peek");
+                      setShowPremiumModal(true);
+                    } else if (semester.status === "current" || semester.status === "upcoming") {
+                      const semesterType = semester.status === "current" ? "current" : "next";
+                      navigate(`/semester/${semesterType}`);
+                    }
+                  }}
+                  >
+                    <CardHeader className="text-center p-4">
+                      <div className="flex flex-col items-center gap-2 mb-2">
+                        <CardTitle className="text-base font-bold">{semester.semester}</CardTitle>
                         {(semester.status === "current" || semester.status === "upcoming") && (
-                          <div className="mt-2 text-xs text-muted-foreground">
-                            {getCompletedTasksCount(semester.tasks).completed} of {getCompletedTasksCount(semester.tasks).total} tasks completed
-                          </div>
+                          <ProgressRing 
+                            progress={getSemesterProgress(semester.tasks)} 
+                            size="sm" 
+                            showPercentage={false}
+                          />
                         )}
-                      </CardHeader>
-                      <CardContent className={semester.status === "future" ? "relative" : ""}>
-                        {/* Future semester blur overlay */}
-                        {semester.status === "future" && (
-                          <div className="absolute inset-0 bg-background/50 backdrop-blur-md rounded-lg flex items-center justify-center z-10">
-                            <div className="text-center p-4">
-                              <Crown className="w-8 h-8 text-primary mx-auto mb-2" />
-                              <p className="text-sm font-medium text-foreground mb-2">Premium Preview</p>
-                              <p className="text-xs text-muted-foreground mb-3">Unlock full roadmap visibility</p>
-                              <Button 
-                                size="sm" 
-                                className="text-xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setPremiumModalTrigger("sneak-peek");
-                                  setShowPremiumModal(true);
-                                }}
-                              >
-                                <Crown className="w-3 h-3 mr-1" />
-                                Unlock Next Steps →
-                              </Button>
-                            </div>
+                      </div>
+                      <CardDescription className="text-xs font-medium">{semester.year}</CardDescription>
+                      
+                      {(semester.status === "current" || semester.status === "upcoming") && (
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          {getCompletedTasksCount(semester.tasks).completed} of {getCompletedTasksCount(semester.tasks).total} tasks
+                        </div>
+                      )}
+                    </CardHeader>
+                    
+                    <CardContent className={`p-4 ${semester.status === "future" ? "relative" : ""}`}>
+                      {/* Future semester blur overlay */}
+                      {semester.status === "future" && (
+                        <div className="absolute inset-0 bg-background/60 backdrop-blur-md rounded-lg flex items-center justify-center z-10">
+                          <div className="text-center p-3">
+                            <Crown className="w-6 h-6 text-primary mx-auto mb-2" />
+                            <p className="text-xs font-medium text-foreground mb-1">Premium</p>
+                            <Button 
+                              size="sm" 
+                              className="text-xs h-6"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPremiumModalTrigger("sneak-peek");
+                                setShowPremiumModal(true);
+                              }}
+                            >
+                              Unlock
+                            </Button>
                           </div>
-                        )}
-                        
-                        {selectedSemester !== index && (
-                          <div className="text-center text-sm text-muted-foreground">
-                            Click to view tasks and progress
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))}
-              </div>
-            </div>
+                        </div>
+                      )}
+                      
+                      {semester.status !== "future" && (
+                        <div className="text-center text-xs text-muted-foreground">
+                          Click to view details
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Connecting line to timeline */}
+                  <div className={`absolute left-1/2 transform -translate-x-1/2 w-0.5 bg-border z-0 ${
+                    isAbove ? 'top-0 h-1/2 mt-4' : 'bottom-0 h-1/2 mb-4'
+                  }`}></div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* Instructions */}
         <div className="mt-12 text-center space-y-4">
           <p className="text-muted-foreground text-lg">
-            💡 Click on semester cards to view tasks and progress on the left
+            💡 Click on "Current" or "Next" semester cards to view detailed tasks and progress
           </p>
-          
-          {/* Priority Filter */}
-          <div className="flex items-center justify-center gap-4">
-            <span className="text-sm font-medium text-foreground">Filter by priority:</span>
-            <div className="flex gap-2">
-              {["all", "critical", "high", "medium", "low"].map((priority) => (
-                <Button
-                  key={priority}
-                  variant={priorityFilter === priority ? "default" : "outline"}
-                  size="sm"
-                  className="text-xs capitalize"
-                  onClick={() => setPriorityFilter(priority)}
-                >
-                  {priority === "all" ? "All Tasks" : priority}
-                </Button>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Task Notes Modal */}
