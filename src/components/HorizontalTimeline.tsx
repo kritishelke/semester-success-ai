@@ -736,9 +736,9 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                     w-full transition-all duration-300 cursor-pointer
                     ${isAbove ? '-mt-48' : 'mt-16'}
                     ${semester.status === "future" 
-                      ? "bg-card/5 backdrop-blur-xl border-border/5 shadow-sm opacity-10 grayscale blur-[8px]" 
+                      ? "bg-card/20 backdrop-blur-sm border-border/20 shadow-sm opacity-30 grayscale blur-[2px]" 
                       : semester.status === "upcoming"
-                      ? "bg-card/40 backdrop-blur-lg border-border/10 shadow-sm opacity-60 blur-[2px]"
+                      ? "bg-card/60 backdrop-blur-sm border-border/30 shadow-sm opacity-80 blur-[0.5px]"
                       : "bg-card/80 backdrop-blur-sm border-border/20 shadow-md hover:shadow-xl hover:scale-105"
                     }
                   `}
@@ -775,7 +775,7 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                     <CardContent className={`p-4 ${semester.status === "future" ? "relative" : ""}`}>
                       {/* Future semester blur overlay */}
                       {semester.status === "future" && (
-                        <div className="absolute inset-0 bg-background/60 backdrop-blur-md rounded-lg flex items-center justify-center z-10">
+                        <div className="absolute inset-0 bg-background/40 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
                           <div className="text-center p-3">
                             <Crown className="w-6 h-6 text-primary mx-auto mb-2" />
                             <p className="text-xs font-medium text-foreground mb-1">Premium</p>

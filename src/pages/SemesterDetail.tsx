@@ -198,36 +198,36 @@ const SemesterDetail = () => {
                       }}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-3 mt-1 flex-shrink-0">
                           <task.icon className="w-5 h-5 text-muted-foreground" />
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleTask(task.id);
                             }}
-                            className="w-5 h-5 rounded border-2 border-muted-foreground hover:border-primary transition-colors flex items-center justify-center"
+                            className="w-5 h-5 rounded border-2 border-muted-foreground hover:border-primary transition-colors flex items-center justify-center flex-shrink-0"
                           >
                             {getTaskCompletion(task.id) && (
                               <CheckCircle className="w-4 h-4 text-green-500 fill-current" />
                             )}
                           </button>
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Badge className={`text-xs ${getPriorityColor(task.priority)} flex-shrink-0`}>
                               {task.priority}
                             </Badge>
                             {task.isPremium && (
-                              <Badge className="text-xs bg-gradient-to-r from-accent to-primary text-white">
+                              <Badge className="text-xs bg-gradient-to-r from-accent to-primary text-white flex-shrink-0">
                                 <Crown className="w-3 h-3 mr-1" />
                                 Premium
                               </Badge>
                             )}
                           </div>
-                          <h4 className={`font-medium ${getTaskCompletion(task.id) ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                          <h4 className={`font-medium ${getTaskCompletion(task.id) ? 'line-through text-muted-foreground' : 'text-foreground'} break-words`}>
                             {task.title}
                           </h4>
-                          <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-words">{task.description}</p>
                         </div>
                       </div>
                     </div>
