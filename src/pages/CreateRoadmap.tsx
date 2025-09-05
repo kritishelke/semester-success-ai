@@ -191,16 +191,49 @@ const CreateRoadmap = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <Label htmlFor="university" className="text-lg font-medium">University *</Label>
-                  <UISelect value={university} onValueChange={setUniversity}>
-                    <SelectTrigger className="h-12 text-lg">
-                      <SelectValue placeholder="Select your university" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {universitiesList.map((u) => (
-                        <SelectItem key={u} value={u}>{u}</SelectItem>
-                      ))}
-                    </SelectContent>
-                   </UISelect>
+                  <ReactSelect
+                    value={university ? { value: university, label: university } : null}
+                    onChange={(selectedOption) => 
+                      setUniversity(selectedOption ? selectedOption.value : "")
+                    }
+                    options={universitiesList.map(uni => ({ value: uni, label: uni }))}
+                    placeholder="Search or select your university"
+                    isSearchable={true}
+                    className="text-lg"
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        minHeight: '48px',
+                        fontSize: '18px',
+                        backgroundColor: 'hsl(var(--background))',
+                        borderColor: 'hsl(var(--border))',
+                        '&:hover': {
+                          borderColor: 'hsl(var(--border))'
+                        }
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused ? 'hsl(var(--muted))' : 'hsl(var(--background))',
+                        color: 'hsl(var(--foreground))',
+                        '&:hover': {
+                          backgroundColor: 'hsl(var(--muted))'
+                        }
+                      }),
+                      singleValue: (base) => ({
+                        ...base,
+                        color: 'hsl(var(--foreground))',
+                      }),
+                      placeholder: (base) => ({
+                        ...base,
+                        color: 'hsl(var(--muted-foreground))',
+                      })
+                    }}
+                  />
                 </div>
 
                 <div className="space-y-3">
