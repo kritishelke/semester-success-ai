@@ -16,6 +16,7 @@ const CreateRoadmap = () => {
   const [minors, setMinors] = useState([]);
   const [year, setYear] = useState("");
   const [career, setCareer] = useState("");
+  const [isCustomCareer, setIsCustomCareer] = useState(false);
   const [university, setUniversity] = useState("");
   const [preProfessional, setPreProfessional] = useState("");
   const [futureGoal, setFutureGoal] = useState("");
@@ -103,7 +104,7 @@ const CreateRoadmap = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (majors.length > 0 && year && career && university) {
+    if (majors.length > 0 && year && career.trim() && university) {
       const data = { 
         majors, 
         minors, 
@@ -374,19 +375,50 @@ const CreateRoadmap = () => {
                    </UISelect>
                  </div>
 
-                 <div className="space-y-3">
-                   <Label htmlFor="career" className="text-lg font-medium">Career Goal *</Label>
-                  <UISelect value={career} onValueChange={setCareer}>
-                    <SelectTrigger className="h-12 text-lg">
-                      <SelectValue placeholder="Select your target career" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {careersList.map((c) => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                   </UISelect>
-                 </div>
+                  <div className="space-y-3">
+                    <Label htmlFor="career" className="text-lg font-medium">Career Goal *</Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="customCareer"
+                          checked={isCustomCareer}
+                          onChange={(e) => {
+                            setIsCustomCareer(e.target.checked);
+                            if (!e.target.checked) setCareer("");
+                          }}
+                          className="rounded border-border"
+                        />
+                        <Label htmlFor="customCareer" className="text-sm">I want to enter a custom career</Label>
+                      </div>
+                      
+                      {isCustomCareer ? (
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            value={career}
+                            onChange={(e) => setCareer(e.target.value)}
+                            placeholder="Enter your target career"
+                            className="w-full h-12 px-3 text-lg rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Enter any real career (e.g., Machine Learning Engineer, UX Designer, Investment Banker)
+                          </p>
+                        </div>
+                      ) : (
+                        <UISelect value={career} onValueChange={setCareer}>
+                          <SelectTrigger className="h-12 text-lg">
+                            <SelectValue placeholder="Select your target career" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {careersList.map((c) => (
+                              <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </UISelect>
+                      )}
+                    </div>
+                  </div>
                </div>
 
                <div className="border-t border-border/50 pt-8">
@@ -404,7 +436,7 @@ const CreateRoadmap = () => {
                   variant="accent" 
                   size="lg" 
                   className="w-full text-xl py-6 h-auto font-semibold"
-                  disabled={majors.length === 0 || !year || !career || !university}
+                  disabled={majors.length === 0 || !year || !career.trim() || !university}
                 >
                   Generate My Career Roadmap
                 </Button>
