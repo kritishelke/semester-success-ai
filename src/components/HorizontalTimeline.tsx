@@ -53,6 +53,15 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
     getCompletedTasksCount 
   } = useTaskProgress();
 
+  // Generate roadmap when roadmapData changes
+  useEffect(() => {
+    if (roadmapData) {
+      const generator = new RoadmapGenerator(roadmapData);
+      const semesters = generator.generateRoadmap();
+      setRoadmapSemesters(semesters);
+    }
+  }, [roadmapData]);
+
   // Load task notes from localStorage
   useEffect(() => {
     const storedNotes = localStorage.getItem('task-notes');
