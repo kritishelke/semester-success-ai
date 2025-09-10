@@ -2,19 +2,10 @@
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import RoadmapForm from "@/components/RoadmapForm";
-import Timeline from "@/components/Timeline";
-import { useState } from "react";
 
 const Index = () => {
-  const [roadmapData, setRoadmapData] = useState<any>(null);
-  const [showTimeline, setShowTimeline] = useState(false);
-
   const handleGenerateRoadmap = (data: any) => {
-    setRoadmapData(data);
-    setShowTimeline(true);
-    setTimeout(() => {
-      document.getElementById("timeline")?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    // Handle roadmap generation
   };
 
   return (
@@ -22,11 +13,6 @@ const Index = () => {
       <Hero />
       <Features />
       <RoadmapForm onGenerateRoadmap={handleGenerateRoadmap} />
-      {showTimeline && (
-        <div id="timeline">
-          <Timeline roadmapData={roadmapData} />
-        </div>
-      )}
     </div>
   );
 };
