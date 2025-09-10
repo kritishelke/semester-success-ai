@@ -43,6 +43,7 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
   const [roadmapSemesters, setRoadmapSemesters] = useState<any[]>([]);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [premiumModalTrigger, setPremiumModalTrigger] = useState<"sneak-peek" | "task-click" | "completion">("sneak-peek");
+  const [expandedSemester, setExpandedSemester] = useState<number | null>(null);
   
   const { 
     taskProgress,
@@ -153,86 +154,161 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
           </div>
         )}
 
-        {/* Horizontal Timeline with Alternating Layout */}
-        <div className="relative">
-          {/* Timeline line */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full transform -translate-y-1/2 z-0"></div>
+        {/* Horizontal Timeline with Anchored Boxes */}
+        <div className="relative px-8">
+          {/* Main timeline line */}
+          <div className="absolute top-1/2 left-8 right-8 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full transform -translate-y-1/2 z-0"></div>
           
-          <div className="flex items-start justify-between gap-8 py-20">
+          {/* Timeline containers */}
+          <div className="relative py-32">
             {roadmapSemesters.slice(0, 4).map((semester, index) => {
               const isAbove = index % 2 === 0;
+              const leftPosition = `${(index / 3) * 100}%`;
+              
               return (
-                <div key={index} className="flex-1 relative">
-                  {/* Content positioned fully above or below the line */}
-                  <Card className={`
-                    w-full transition-all duration-300 cursor-pointer
-                    ${isAbove ? '-mt-32' : 'mt-16'}
-                    ${semester.status === "future" 
-                      ? "bg-card/30 backdrop-blur-sm border-border/20 shadow-sm opacity-50 grayscale" 
-                      : semester.status === "upcoming"
-                      ? "bg-card/70 backdrop-blur-sm border-border/30 shadow-sm opacity-90"
-                      : "bg-card/80 backdrop-blur-sm border-border/20 shadow-md hover:shadow-xl hover:scale-105"
-                    }
-                  `}
-                  onClick={() => {
-                    if (semester.status === "future") {
-                      setPremiumModalTrigger("sneak-peek");
-                      setShowPremiumModal(true);
-                    } else if (semester.status === "current" || semester.status === "upcoming") {
-                      const semesterType = semester.status === "current" ? "current" : "next";
-                      navigate(`/semester/${semesterType}`);
-                    }
-                  }}
-                  >
-                    <CardHeader className="text-center p-4">
-                      <div className="flex flex-col items-center gap-2 mb-2">
-                        <CardTitle className="text-base font-bold">{semester.semester}</CardTitle>
-                        {(semester.status === "current" || semester.status === "upcoming") && (
-                          <ProgressRing 
-                            progress={getSemesterProgress(semester.tasks)} 
-                            size="sm" 
-                            showPercentage={false}
-                          />
-                        )}
-                      </div>
-                      <CardDescription className="text-xs font-medium">{semester.year}</CardDescription>
-                      
-                      {(semester.status === "current" || semester.status === "upcoming") && (
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          {getCompletedTasksCount(semester.tasks).completed} of {getCompletedTasksCount(semester.tasks).total} tasks
+                <div key={index} className="absolute" style={{ left: leftPosition }}>
+                  {/* Anchor circle on the line */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                    <div className="w-4 h-4 bg-background border-2 border-primary rounded-full"></div>
+                  </div>
+                  
+                  {/* Connecting stem */}
+                  <div className={`
+                    absolute left-1/2 transform -translate-x-0.5 w-0.5 bg-border z-5
+                    ${isAbove ? 'bottom-1/2 h-8' : 'top-1/2 h-8'}
+                  `}></div>
+                  
+                  {/* Semester box */}
+                  <div className={`
+                    w-64 transition-all duration-300
+                    ${isAbove ? 'absolute bottom-1/2 mb-8 left-1/2 transform -translate-x-1/2' : 'absolute top-1/2 mt-8 left-1/2 transform -translate-x-1/2'}
+                  `}>
+                    <Card className={`
+                      cursor-pointer transition-all duration-300
+                      ${semester.status === "future" 
+                        ? "bg-card/30 backdrop-blur-sm border-border/20 shadow-sm opacity-50 grayscale" 
+                        : semester.status === "upcoming"
+                        ? "bg-card/70 backdrop-blur-sm border-border/30 shadow-sm opacity-90"
+                        : "bg-card/80 backdrop-blur-sm border-border/20 shadow-md hover:shadow-xl hover:scale-105"
+                      }
+                    `}>
+                      <CardHeader className="text-center p-4">
+                        <div className="flex flex-col items-center gap-2 mb-2">
+                          <CardTitle className="text-base font-bold">{semester.semester}</CardTitle>
+                          {(semester.status === "current" || semester.status === "upcoming") && (
+                            <ProgressRing 
+                              progress={getSemesterProgress(semester.tasks)} 
+                              size="sm" 
+                              showPercentage={false}
+                            />
+                          )}
                         </div>
-                      )}
-                    </CardHeader>
-                    
-                    <CardContent className={`p-4 ${semester.status === "future" ? "relative" : ""}`}>
-                      {/* Future semester blur overlay */}
-                      {semester.status === "future" && (
-                        <div className="absolute inset-0 bg-background/40 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
-                          <div className="text-center p-3">
-                            <Crown className="w-6 h-6 text-primary mx-auto mb-2" />
-                            <p className="text-xs font-medium text-foreground mb-1">Premium</p>
+                        <CardDescription className="text-xs font-medium">{semester.year}</CardDescription>
+                        
+                        {(semester.status === "current" || semester.status === "upcoming") && (
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            {getCompletedTasksCount(semester.tasks).completed} of {getCompletedTasksCount(semester.tasks).total} tasks
+                          </div>
+                        )}
+                      </CardHeader>
+                      
+                      <CardContent className={`p-4 ${semester.status === "future" ? "relative" : ""}`}>
+                        {/* Future semester blur overlay */}
+                        {semester.status === "future" && (
+                          <div className="absolute inset-0 bg-background/40 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                            <div className="text-center p-3">
+                              <Crown className="w-6 h-6 text-primary mx-auto mb-2" />
+                              <p className="text-xs font-medium text-foreground mb-1">Premium</p>
+                              <Button 
+                                size="sm" 
+                                className="text-xs h-6"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPremiumModalTrigger("sneak-peek");
+                                  setShowPremiumModal(true);
+                                }}
+                              >
+                                Unlock
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {semester.status !== "future" && (
+                          <div className="text-center">
                             <Button 
                               size="sm" 
-                              className="text-xs h-6"
+                              variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setPremiumModalTrigger("sneak-peek");
-                                setShowPremiumModal(true);
+                                setExpandedSemester(expandedSemester === index ? null : index);
                               }}
+                              className="text-xs"
                             >
-                              Unlock
+                              {expandedSemester === index ? (
+                                <>
+                                  <ChevronUp className="w-3 h-3 mr-1" />
+                                  Hide Tasks
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="w-3 h-3 mr-1" />
+                                  View Tasks
+                                </>
+                              )}
                             </Button>
                           </div>
-                        </div>
-                      )}
-                      
-                      {semester.status !== "future" && (
-                        <div className="text-center text-xs text-muted-foreground">
-                          Click to view details
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Expanded task view */}
+                    {expandedSemester === index && semester.status !== "future" && (
+                      <Card className={`
+                        mt-4 bg-card/90 backdrop-blur-sm border-border/30 shadow-lg
+                        animate-fade-in
+                      `}>
+                        <CardContent className="p-4">
+                          <div className="space-y-3">
+                            {['critical', 'high', 'medium', 'low'].map((priority) => {
+                              const priorityTasks = semester.tasks.filter(task => task.priority === priority);
+                              if (priorityTasks.length === 0) return null;
+                              
+                              return (
+                                <div key={priority} className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    {getPriorityIcon(priority)}
+                                    <span className="text-sm font-medium capitalize">{priority}</span>
+                                    <Badge variant="secondary" className="text-xs">
+                                      {priorityTasks.length}
+                                    </Badge>
+                                  </div>
+                                  <div className="space-y-1 ml-6">
+                                    {priorityTasks.map((task) => (
+                                      <div key={task.id} className="flex items-center gap-2">
+                                        <input
+                                          type="checkbox"
+                                          checked={getTaskCompletion(task.id)}
+                                          onChange={() => toggleTask(task.id)}
+                                          className="w-3 h-3 rounded border-border"
+                                        />
+                                        <span className={`text-xs ${getTaskCompletion(task.id) ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                                          {task.title}
+                                        </span>
+                                        {task.isPremium && (
+                                          <Crown className="w-3 h-3 text-primary" />
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
                 </div>
               );
             })}
