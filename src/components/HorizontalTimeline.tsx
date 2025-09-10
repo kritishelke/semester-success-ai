@@ -166,11 +166,11 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                   {/* Content positioned fully above or below the line */}
                   <Card className={`
                     w-full transition-all duration-300 cursor-pointer
-                    ${isAbove ? '-mt-32' : 'mt-8'}
+                    ${isAbove ? '-mt-32' : 'mt-16'}
                     ${semester.status === "future" 
-                      ? "bg-card/20 backdrop-blur-sm border-border/20 shadow-sm opacity-30 grayscale blur-[2px]" 
+                      ? "bg-card/30 backdrop-blur-sm border-border/20 shadow-sm opacity-50 grayscale" 
                       : semester.status === "upcoming"
-                      ? "bg-card/60 backdrop-blur-sm border-border/30 shadow-sm opacity-80 blur-[0.5px]"
+                      ? "bg-card/70 backdrop-blur-sm border-border/30 shadow-sm opacity-90"
                       : "bg-card/80 backdrop-blur-sm border-border/20 shadow-md hover:shadow-xl hover:scale-105"
                     }
                   `}
