@@ -114,15 +114,10 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
     setSelectedTask(task);
   };
 
-  // Add custom task - removed since we navigate to detail page
-  // const addCustomTask = (semesterIndex: number, taskContent: string) => {
-  //   // Implementation removed
-  // };
-
   // Delete custom task
   const deleteTask = (semesterIndex: number, taskId: string) => {
     const updatedSemesters = [...roadmapSemesters];
-    updatedSemesters[semesterIndex].tasks = updatedSemesters[semesterIndex].tasks.filter(task => task.id !== taskId);
+    updatedSemesters[semesterIndex].tasks = updatedSemesters[semesterIndex].tasks.filter((task: Task) => task.id !== taskId);
     setRoadmapSemesters(updatedSemesters);
     
     // Remove associated notes
@@ -156,71 +151,80 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
 
         {/* Horizontal Timeline with Anchored Boxes */}
         <div className="relative px-8 mt-8 isolate">
-          {/* Main timeline line */}
-          <div className="absolute top-1/2 left-8 right-8 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full transform -translate-y-1/2 z-10"></div>
-          
-          {/* Timeline containers */}
-          <div className="relative py-48 z-20">
+          {/* Main timeline line (behind everything) */}
+          <div
+            className="pointer-events-none absolute top-1/2 left-8 right-8 h-1
+                       bg-gradient-to-r from-primary via-secondary to-accent rounded-full
+                       -translate-y-1/2 z-0"
+          />
+
+          {/* Timeline containers (cards, stems, dots live above the track) */}
+          <div className="relative py-48 z-10">
             {roadmapSemesters.slice(0, 4).map((semester, index) => {
               const isAbove = index % 2 === 0;
-              const leftPosition = `${(index / 3) * 100}%`;
-              
+              const leftPosition = `${(index / 3) * 100}%`; // 0%, 33%, 66%, 100%
+
               return (
                 <div key={index} className="absolute" style={{ left: leftPosition }}>
-                  {/* Anchor circle on the line */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-                    <div className="w-4 h-4 bg-background border-2 border-primary rounded-full"></div>
+                  {/* Anchor dot on the line (highest layer) */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
+                    <div className="h-3 w-3 rounded-full bg-background ring-2 ring-emerald-400" />
                   </div>
-                  
-                  {/* Connecting stem */}
-                  <div className={`
-                    absolute left-1/2 transform -translate-x-0.5 w-0.5 bg-border z-20
-                    ${isAbove ? 'bottom-1/2 h-16' : 'top-1/2 h-16'}
-                  `}></div>
-                  
+
+                  {/* Connecting stem (above cards) */}
+                  <div
+                    className={`absolute left-1/2 -translate-x-0.5 w-[2px] bg-border z-30
+                                ${isAbove ? "bottom-1/2 h-12" : "top-1/2 h-12"}`}
+                  />
+
                   {/* Semester box */}
-                  <div className={`
-                    w-64 transition-all duration-300 z-30 relative
-                    ${isAbove ? 'absolute bottom-1/2 mb-16 left-1/2 transform -translate-x-1/2' : 'absolute top-1/2 mt-16 left-1/2 transform -translate-x-1/2'}
-                  `}>
-                    <Card className={`
-                      cursor-pointer transition-all duration-300 z-30 relative
-                      ${semester.status === "future" 
-                        ? "bg-card backdrop-blur-sm border-border/20 shadow-sm opacity-50 grayscale" 
-                        : semester.status === "upcoming"
-                        ? "bg-card backdrop-blur-sm border-border/30 shadow-sm opacity-90"
-                        : "bg-card backdrop-blur-sm border-border/20 shadow-md hover:shadow-xl hover:scale-105"
-                      }
-                    `}>
+                  <div
+                    className={`w-64 transition-all duration-300 relative
+                                ${isAbove
+                                  ? "absolute bottom-1/2 mb-16 left-1/2 -translate-x-1/2"
+                                  : "absolute top-1/2 mt-16 left-1/2 -translate-x-1/2"
+                                }`}
+                  >
+                    <Card
+                      className={`
+                        relative z-20 cursor-pointer transition-transform duration-300
+                        ${semester.status === "future"
+                          ? "bg-card/50 backdrop-blur-sm border-border/20 shadow-sm grayscale"
+                          : semester.status === "upcoming"
+                          ? "bg-card/70 backdrop-blur-sm border-border/30 shadow-sm"
+                          : "bg-card/80 backdrop-blur-sm border-border/20 shadow-md hover:shadow-xl hover:scale-105"
+                        }
+                      `}
+                    >
                       <CardHeader className="text-center p-4">
                         <div className="flex flex-col items-center gap-2 mb-2">
                           <CardTitle className="text-base font-bold">{semester.semester}</CardTitle>
                           {(semester.status === "current" || semester.status === "upcoming") && (
-                            <ProgressRing 
-                              progress={getSemesterProgress(semester.tasks)} 
-                              size="sm" 
+                            <ProgressRing
+                              progress={getSemesterProgress(semester.tasks)}
+                              size="sm"
                               showPercentage={false}
                             />
                           )}
                         </div>
                         <CardDescription className="text-xs font-medium">{semester.year}</CardDescription>
-                        
+
                         {(semester.status === "current" || semester.status === "upcoming") && (
                           <div className="mt-2 text-xs text-muted-foreground">
                             {getCompletedTasksCount(semester.tasks).completed} of {getCompletedTasksCount(semester.tasks).total} tasks
                           </div>
                         )}
                       </CardHeader>
-                      
+
                       <CardContent className={`p-4 ${semester.status === "future" ? "relative" : ""}`}>
-                        {/* Future semester blur overlay */}
+                        {/* Future semester blur overlay (kept inside card) */}
                         {semester.status === "future" && (
-                          <div className="absolute inset-0 bg-background/40 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                          <div className="absolute inset-0 bg-background/40 backdrop-blur-sm rounded-lg flex items-center justify-center">
                             <div className="text-center p-3">
                               <Crown className="w-6 h-6 text-primary mx-auto mb-2" />
                               <p className="text-xs font-medium text-foreground mb-1">Premium</p>
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 className="text-xs h-6"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -233,11 +237,11 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                             </div>
                           </div>
                         )}
-                        
+
                         {semester.status !== "future" && (
                           <div className="text-center">
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -261,19 +265,21 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                         )}
                       </CardContent>
                     </Card>
-                    
+
                     {/* Expanded task view */}
                     {expandedSemester === index && semester.status !== "future" && (
-                      <Card className={`
-                        mt-4 bg-card/90 backdrop-blur-sm border-border/30 shadow-lg
-                        animate-fade-in
-                      `}>
+                      <Card
+                        className={`
+                          mt-4 bg-card/90 backdrop-blur-sm border-border/30 shadow-lg
+                          animate-fade-in relative z-20
+                        `}
+                      >
                         <CardContent className="p-4">
                           <div className="space-y-3">
-                            {['critical', 'high', 'medium', 'low'].map((priority) => {
-                              const priorityTasks = semester.tasks.filter(task => task.priority === priority);
+                            {(['critical', 'high', 'medium', 'low'] as const).map((priority) => {
+                              const priorityTasks = semester.tasks.filter((t: Task) => t.priority === priority);
                               if (priorityTasks.length === 0) return null;
-                              
+
                               return (
                                 <div key={priority} className="space-y-2">
                                   <div className="flex items-center gap-2">
@@ -284,7 +290,7 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                                     </Badge>
                                   </div>
                                   <div className="space-y-1 ml-6">
-                                    {priorityTasks.map((task) => (
+                                    {priorityTasks.map((task: Task) => (
                                       <div key={task.id} className="flex items-center gap-2">
                                         <input
                                           type="checkbox"
@@ -398,3 +404,4 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
 };
 
 export default HorizontalTimeline;
+
