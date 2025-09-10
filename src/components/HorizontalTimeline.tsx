@@ -155,12 +155,12 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
         )}
 
         {/* Horizontal Timeline with Anchored Boxes */}
-        <div className="relative px-8">
+        <div className="relative px-8 mt-8">
           {/* Main timeline line */}
           <div className="absolute top-1/2 left-8 right-8 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full transform -translate-y-1/2 z-0"></div>
           
           {/* Timeline containers */}
-          <div className="relative py-32">
+          <div className="relative py-48">
             {roadmapSemesters.slice(0, 4).map((semester, index) => {
               const isAbove = index % 2 === 0;
               const leftPosition = `${(index / 3) * 100}%`;
@@ -175,13 +175,13 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                   {/* Connecting stem */}
                   <div className={`
                     absolute left-1/2 transform -translate-x-0.5 w-0.5 bg-border z-5
-                    ${isAbove ? 'bottom-1/2 h-8' : 'top-1/2 h-8'}
+                    ${isAbove ? 'bottom-1/2 h-16' : 'top-1/2 h-16'}
                   `}></div>
                   
                   {/* Semester box */}
                   <div className={`
                     w-64 transition-all duration-300
-                    ${isAbove ? 'absolute bottom-1/2 mb-8 left-1/2 transform -translate-x-1/2' : 'absolute top-1/2 mt-8 left-1/2 transform -translate-x-1/2'}
+                    ${isAbove ? 'absolute bottom-1/2 mb-16 left-1/2 transform -translate-x-1/2' : 'absolute top-1/2 mt-16 left-1/2 transform -translate-x-1/2'}
                   `}>
                     <Card className={`
                       cursor-pointer transition-all duration-300
@@ -316,7 +316,7 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
         </div>
 
         {/* Instructions */}
-        <div className="mt-12 text-center space-y-4">
+        <div className="mt-20 text-center space-y-4">
           <p className="text-muted-foreground text-lg">
             💡 Click on "Current" or "Next" semester cards to view detailed tasks and progress
           </p>
