@@ -174,7 +174,7 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                   
                   {/* Connecting stem */}
                   <div className={`
-                    absolute left-1/2 transform -translate-x-0.5 w-0.5 bg-border z-5
+                    absolute left-1/2 transform -translate-x-0.5 w-0.5 bg-border z-20
                     ${isAbove ? 'bottom-1/2 h-16' : 'top-1/2 h-16'}
                   `}></div>
                   
