@@ -155,12 +155,12 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
         )}
 
         {/* Horizontal Timeline with Anchored Boxes */}
-        <div className="relative px-8 mt-8">
+        <div className="relative px-8 mt-8 isolate">
           {/* Main timeline line */}
-          <div className="absolute top-1/2 left-8 right-8 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full transform -translate-y-1/2 z-0"></div>
+          <div className="absolute top-1/2 left-8 right-8 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full transform -translate-y-1/2 z-10"></div>
           
           {/* Timeline containers */}
-          <div className="relative py-48">
+          <div className="relative py-48 z-20">
             {roadmapSemesters.slice(0, 4).map((semester, index) => {
               const isAbove = index % 2 === 0;
               const leftPosition = `${(index / 3) * 100}%`;
@@ -180,16 +180,16 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                   
                   {/* Semester box */}
                   <div className={`
-                    w-64 transition-all duration-300
+                    w-64 transition-all duration-300 z-30 relative
                     ${isAbove ? 'absolute bottom-1/2 mb-16 left-1/2 transform -translate-x-1/2' : 'absolute top-1/2 mt-16 left-1/2 transform -translate-x-1/2'}
                   `}>
                     <Card className={`
-                      cursor-pointer transition-all duration-300
+                      cursor-pointer transition-all duration-300 z-30 relative
                       ${semester.status === "future" 
-                        ? "bg-card/30 backdrop-blur-sm border-border/20 shadow-sm opacity-50 grayscale" 
+                        ? "bg-card backdrop-blur-sm border-border/20 shadow-sm opacity-50 grayscale" 
                         : semester.status === "upcoming"
-                        ? "bg-card/70 backdrop-blur-sm border-border/30 shadow-sm opacity-90"
-                        : "bg-card/80 backdrop-blur-sm border-border/20 shadow-md hover:shadow-xl hover:scale-105"
+                        ? "bg-card backdrop-blur-sm border-border/30 shadow-sm opacity-90"
+                        : "bg-card backdrop-blur-sm border-border/20 shadow-md hover:shadow-xl hover:scale-105"
                       }
                     `}>
                       <CardHeader className="text-center p-4">
