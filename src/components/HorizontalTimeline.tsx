@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Circle, Clock, Users, Briefcase, GraduationCap, AlertCircle, Zap, Star, ExternalLink, Crown, Filter } from "lucide-react";
+import { Users, Briefcase, GraduationCap, AlertCircle, Zap, Star, ExternalLink, Crown, Filter, Circle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskNotesView from "./TaskNotesView";
@@ -88,14 +88,6 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
     return suggestions[taskTitle] || `Consider connecting this with your ${major} major and ${career} career goals. Research specific requirements and prerequisites.`;
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "current": return <CheckCircle className="w-6 h-6 text-green-500" />;
-      case "upcoming": return <Clock className="w-6 h-6 text-accent" />;
-      default: return <Circle className="w-6 h-6 text-muted-foreground" />;
-    }
-  };
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "critical": return "bg-red-500/10 text-red-500 border-red-500/20";
@@ -166,20 +158,15 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
           {/* Timeline line */}
           <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full transform -translate-y-1/2 z-0"></div>
           
-          <div className="flex items-center justify-between gap-8 py-20">
+          <div className="flex items-start justify-between gap-8 py-20">
             {roadmapSemesters.slice(0, 4).map((semester, index) => {
               const isAbove = index % 2 === 0;
               return (
                 <div key={index} className="flex-1 relative">
-                  {/* Timeline node */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background border-4 border-primary rounded-full p-3 z-10">
-                    {getStatusIcon(semester.status)}
-                  </div>
-                  
-                  {/* Content positioned above or below */}
+                  {/* Content positioned fully above or below the line */}
                   <Card className={`
                     w-full transition-all duration-300 cursor-pointer
-                    ${isAbove ? '-mt-48' : 'mt-16'}
+                    ${isAbove ? '-mt-32' : 'mt-8'}
                     ${semester.status === "future" 
                       ? "bg-card/20 backdrop-blur-sm border-border/20 shadow-sm opacity-30 grayscale blur-[2px]" 
                       : semester.status === "upcoming"
@@ -246,11 +233,6 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                       )}
                     </CardContent>
                   </Card>
-                  
-                  {/* Connecting line to timeline */}
-                  <div className={`absolute left-1/2 transform -translate-x-1/2 w-0.5 bg-border z-0 ${
-                    isAbove ? 'top-0 h-1/2 mt-4' : 'bottom-0 h-1/2 mb-4'
-                  }`}></div>
                 </div>
               );
             })}
