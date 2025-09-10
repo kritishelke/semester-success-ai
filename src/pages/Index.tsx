@@ -1,11 +1,21 @@
 // src/pages/Index.tsx
+import { useState } from "react";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import RoadmapForm from "@/components/RoadmapForm";
+import Timeline from "@/components/HorizontalTimeline"; 
 
 const Index = () => {
+  const [roadmapData, setRoadmapData] = useState<any>(null);
+  const [showTimeline, setShowTimeline] = useState(false);
+
   const handleGenerateRoadmap = (data: any) => {
-    // Handle roadmap generation
+    setRoadmapData(data);
+    setShowTimeline(true);
+
+    setTimeout(() => {
+      document.getElementById("timeline")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   return (
@@ -13,9 +23,15 @@ const Index = () => {
       <Hero />
       <Features />
       <RoadmapForm onGenerateRoadmap={handleGenerateRoadmap} />
+      {showTimeline && (
+        <div id="timeline">
+          <Timeline roadmapData={roadmapData} />
+        </div>
+      )}
     </div>
   );
 };
 
 export default Index;
+
 
