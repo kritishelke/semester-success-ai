@@ -5,6 +5,7 @@ import {
   careerTasks, 
   generateDefaultCareerTasks 
 } from '@/data/taskTemplates';
+import { Briefcase, Zap } from 'lucide-react';
 
 export interface RoadmapData {
   majors: string[];
@@ -186,7 +187,7 @@ export class RoadmapGenerator {
           type: 'career',
           title: `Apply to Full-Time ${career} Positions`,
           description: 'Target top companies in your field with strong applications',
-          icon: require('lucide-react').Briefcase,
+          icon: Briefcase,
           isPremium: true
         });
 
@@ -196,7 +197,7 @@ export class RoadmapGenerator {
           type: 'skill',
           title: 'Intensive Interview Preparation',
           description: 'Practice technical interviews, behavioral questions, and case studies',
-          icon: require('lucide-react').Zap
+          icon: Zap
         });
       }
     }
@@ -210,7 +211,7 @@ export class RoadmapGenerator {
           type: 'internship',
           title: 'Secure Summer Internship',
           description: 'Focus on competitive internships that can lead to full-time offers',
-          icon: require('lucide-react').Briefcase,
+          icon: Briefcase,
           isPremium: true
         });
       }
