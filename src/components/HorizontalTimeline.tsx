@@ -137,13 +137,13 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
                   {/* Stem (above cards) */}
                   <div
                     className={`absolute left-1/2 -translate-x-[1px] w-[2px] bg-border z-30
-                                ${isAbove ? "bottom-1/2 h-14" : "top-1/2 h-14"}`}
+                                ${isAbove ? "bottom-1/2 h-20" : "top-1/2 h-20"}`}
                   />
 
                   {/* Card container */}
                   <div
                     className={`absolute left-1/2 -translate-x-1/2 w-64
-                                ${isAbove ? "bottom-[calc(50%+56px)]" : "top-[calc(50%+56px)]"}`}
+                                ${isAbove ? "bottom-[calc(50%+80px)]" : "top-[calc(50%+80px)]"}`}
                   >
                     <Card
                       className={`relative z-20 transition-transform duration-300
