@@ -108,9 +108,9 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
         )}
 
         {/* TIMELINE REGION */}
-        <section className="relative mt-8 px-8 isolate overflow-visible h-[520px]">
+        <section className="relative mt-20 px-8 isolate overflow-visible h-[600px]">
           {/* Track (centered, behind everything) */}
-          <div className="pointer-events-none absolute left-8 right-8 z-0" style={{ top: "50%", transform: "translateY(-1.5px)" }}>
+          <div className="pointer-events-none absolute left-8 right-8 z-0" style={{ top: "40%", transform: "translateY(-1.5px)" }}>
             <div className="h-[3px] rounded-full bg-gradient-to-r from-primary via-secondary to-accent" />
           </div>
 
@@ -121,18 +121,18 @@ const HorizontalTimeline = ({ roadmapData }: HorizontalTimelineProps) => {
               return (
                 <div key={index} className="absolute top-0 h-full w-64 -translate-x-1/2" style={{ left: leftPct(index) }}>
                   {/* Dot on the track (highest) */}
-                  <div className="absolute left-1/2 z-40" style={{ top: "50%", transform: "translate(-50%, -50%)" }}>
+                  <div className="absolute left-1/2 z-40" style={{ top: "40%", transform: "translate(-50%, -50%)" }}>
                     <div className="h-3.5 w-3.5 rounded-full bg-background ring-2 ring-emerald-400" />
                   </div>
 
                   {/* Stem (tiny so the card edge kisses the line) */}
                   <div
-                    className={`absolute left-1/2 -translate-x-[1px] w-[2px] bg-border z-30 ${isAbove ? "bottom-1/2 h-[6px]" : "top-1/2 h-[6px]"}`}
+                    className={`absolute left-1/2 -translate-x-[1px] w-[2px] bg-border z-30 ${isAbove ? "bottom-3/5 h-20" : "top-2/5 h-20"}`}
                   />
 
                   {/* Card container – attached to the line */}
                   <div
-                    className={`absolute left-1/2 -translate-x-1/2 w-64 ${isAbove ? "bottom-1/2 -mb-[1.5px]" : "top-1/2 -mt-[1.5px]"}`}
+                    className={`absolute left-1/2 -translate-x-1/2 w-64 ${isAbove ? "bottom-3/5 -mb-[1.5px]" : "top-2/5 -mt-[1.5px]"}`}
                   >
                     <Card
                       className={`relative z-20 transition-transform duration-300 border border-border/30 ${

@@ -169,6 +169,11 @@ export class RoadmapGenerator {
     // Add semester-specific tasks
     tasks.push(...this.generateSemesterSpecificTasks(semester, yearLevel));
 
+    // Ensure at least 5 tasks per semester
+    while (tasks.length < 5) {
+      tasks.push(this.generateFillerTask(tasks.length + 1, semester, yearLevel));
+    }
+
     // Sort by priority: critical -> high -> medium -> low
     const priorityOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
     return tasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
@@ -230,6 +235,56 @@ export class RoadmapGenerator {
       icon: template.icon,
       isPremium: template.isPremium,
       isCustom
+    };
+  }
+
+  private generateFillerTask(index: number, semester: string, yearLevel: string): GeneratedTask {
+    const career = this.roadmapData.career;
+    const major = this.roadmapData.majors[0];
+    
+    const fillerTasks = [
+      {
+        title: `Complete ${major} coursework requirements`,
+        description: `Focus on core ${major} classes and maintain strong GPA`,
+        type: 'academic',
+        priority: 'medium' as const
+      },
+      {
+        title: `Build ${career} portfolio projects`,
+        description: `Create projects that demonstrate ${career} skills`,
+        type: 'project',
+        priority: 'high' as const
+      },
+      {
+        title: `Network with ${career} professionals`,
+        description: `Connect with industry professionals through LinkedIn and events`,
+        type: 'networking',
+        priority: 'medium' as const
+      },
+      {
+        title: `Attend career development workshops`,
+        description: `Participate in resume workshops and career fairs`,
+        type: 'career',
+        priority: 'low' as const
+      },
+      {
+        title: `Develop technical skills for ${career}`,
+        description: `Learn industry-relevant tools and technologies`,
+        type: 'skill',
+        priority: 'high' as const
+      }
+    ];
+
+    const task = fillerTasks[(index - 1) % fillerTasks.length];
+    
+    return {
+      id: `filler-${semester}-${index}-${Date.now()}`,
+      priority: task.priority,
+      type: task.type,
+      title: task.title,
+      description: task.description,
+      icon: Briefcase,
+      isCustom: true
     };
   }
 
